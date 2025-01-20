@@ -43,27 +43,14 @@ def calculate_darlehensphase(bausparsumme, zins_tilgung, darlehenszins):
 
 # Berechnung der erforderlichen Sparrate für eine gewünschte Zuteilungszeit
 def calculate_required_rate(bausparsumme, sparzins, abschlussgebuehr, jahresentgelt, einmalzahlung, zuteilungszeit):
-    restbetrag = -abschlussgebuehr  # Anfangswert: Abschlussgebühr
-    monate = 0
-    mindestsparguthaben = bausparsumme * 0.4
-    monatlicher_sparbeitrag = 50  # Startwert
+    mindestsparguthaben = bausparsumme * 0.4  # 40 % der Bausparsumme
+    jahresentgelt_betrag = min((bausparsumme / 1000) * jahresentgelt, 30) * zuteilungszeit  # Jahresentgelt über gesamte Zeit
+    zielguthaben = mindestsparguthaben + abschlussgebuehr + jahresentgelt_betrag - einmalzahlung
 
-    while True:
-        restbetrag = -abschlussgebuehr + einmalzahlung  # Zurücksetzen
-        monate = 0
-
-        while restbetrag < mindestsparguthaben and monate < zuteilungszeit * 12:
-            zinsen = max(0, restbetrag) * (sparzins / 100 / 12)
-            jahresentgelt_betrag = min((bausparsumme / 1000) * jahresentgelt, 30) / 12
-            sparbetrag = monatlicher_sparbeitrag - jahresentgelt_betrag
-            restbetrag += sparbetrag + zinsen
-            monate += 1
-
-        if monate <= zuteilungszeit * 12:
-            break
-        monatlicher_sparbeitrag += 10  # Erhöhe die Sparrate um 10 €
-
-    return monatlicher_sparbeitrag
+    # Direkte Lösung für R
+    monate = zuteilungszeit * 12
+    r = zielguthaben / (monate + (monate * (monate + 1) / 2) * (sparzins / 100 / 12))
+    return r
 
 # Funktionsdefinition für den Tarifrechner
 def tarif_rechner(name, sparzins, regelsparbeitrag, abschlussgebuehr, jahresentgelt, zins_tilgung, darlehenszins):
@@ -179,6 +166,7 @@ elif tarif == "Classic20 Plus F":
     tarif_rechner("Classic20 Plus F", sparzins=0.01, regelsparbeitrag=4, abschlussgebuehr=1.6, jahresentgelt=0.30, zins_tilgung=5, darlehenszins=1.65)
 elif tarif == "Spar25":
     tarif_rechner("Spar25", sparzins=0.25, regelsparbeitrag=5, abschlussgebuehr=1.6, jahresentgelt=0.30, zins_tilgung=6, darlehenszins=4.25)
+
 
 
 
