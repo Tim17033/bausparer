@@ -150,4 +150,3 @@ elif tarif == "Classic20 Plus F":
 elif tarif == "Spar25":
     show_tarif_details("Spar25", 0.25, 5, 1.6, 0.30, 6, 4.25, 10000)
     tarif_rechner("Spar25", 0.25, 5, 1.6, 0.30, 6, 4.25)
-```
