@@ -23,8 +23,8 @@ def calculate_ansparphase_with_pandas(bausparsumme, monatlicher_sparbeitrag, spa
     return df
 
 # Berechnung der Darlehensphase
-def calculate_darlehensphase_with_pandas(bausparsumme, darlehenszins, zins_tilgung):
-    darlehensbetrag = bausparsumme * 0.6
+def calculate_darlehensphase_with_pandas(bausparsumme, angespartes_guthaben, darlehenszins, zins_tilgung):
+    darlehensbetrag = bausparsumme - angespartes_guthaben
     monatliche_rate = bausparsumme * zins_tilgung / 1000
     laufzeit_monate = 0
     data = []
@@ -80,7 +80,7 @@ def tarif_rechner(name, sparzins, regelsparbeitrag, abschlussgebuehr, jahresentg
         vorschlag_sparrate = bausparsumme * regelsparbeitrag / 1000
         monatlicher_sparbeitrag = st.number_input(
             f"📅 Monatliche Sparrate (Vorschlag: {vorschlag_sparrate:.2f} €, Regelsparbeitrag):",
-            min_value=1.0,
+            min_value=1.0,  # Mindestwert angepasst auf 1 €
             max_value=2000.0,
             value=float(max(1.0, vorschlag_sparrate)),
             step=10.0,
@@ -100,6 +100,7 @@ def tarif_rechner(name, sparzins, regelsparbeitrag, abschlussgebuehr, jahresentg
 
         monate_anspar = len(df_anspar)
         zinsen_anspar = df_anspar["Zinsen"].sum()
+        angespartes_guthaben = df_anspar["Guthaben"].iloc[-1]
 
         if monate_anspar / 12 > zuteilungszeit:
             erforderliche_sparrate = calculate_adjusted_sparrate(
@@ -112,7 +113,7 @@ def tarif_rechner(name, sparzins, regelsparbeitrag, abschlussgebuehr, jahresentg
             )
 
         df_darlehen = calculate_darlehensphase_with_pandas(
-            bausparsumme, darlehenszins, zins_tilgung
+            bausparsumme, angespartes_guthaben, darlehenszins, zins_tilgung
         )
         laufzeit_darlehen = len(df_darlehen)
         zins_darlehen = df_darlehen["Zinsen"].sum()
