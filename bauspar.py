@@ -2,6 +2,7 @@ import streamlit as st
 import matplotlib.pyplot as plt
 import numpy as np
 import time
+from datetime import datetime, timedelta
 
 # Berechnung der Ansparphase
 def calculate_ansparphase(bausparsumme, monatlicher_sparbeitrag, sparzins, abschlussgebuehr, jahresentgelt, einmalzahlung):
@@ -41,39 +42,6 @@ def calculate_darlehensphase(bausparsumme, zins_tilgung, darlehenszins):
 
     return monate, restschuld_verlauf
 
-# Berechnung der erforderlichen Sparrate für eine gewünschte Zuteilungszeit
-def calculate_required_rate(bausparsumme, sparzins, abschlussgebuehr, jahresentgelt, einmalzahlung, zuteilungszeit):
-    mindestsparguthaben = bausparsumme * 0.4  # 40 % der Bausparsumme
-    jahresentgelt_betrag = min((bausparsumme / 1000) * jahresentgelt, 30) * zuteilungszeit  # Jahresentgelt über gesamte Zeit
-    zielguthaben = mindestsparguthaben + abschlussgebuehr + jahresentgelt_betrag - einmalzahlung
-
-    # Anzahl der Monate
-    monate = zuteilungszeit * 12
-
-    # Berechnung der Sparrate
-    r = zielguthaben / (
-        monate
-        + (monate * (monate + 1) / 2) * (sparzins / 100 / 12)
-    )
-    return r
-
-# Funktion zur Anzeige der Tarifkonditionen
-def show_tarif_details(tarif_name, sparzins, regelsparbeitrag, abschlussgebuehr, jahresentgelt, zins_tilgung, darlehenszins):
-    st.markdown(f"### Tarifkonditionen – {tarif_name}")
-    st.markdown(
-        f"""
-        **Ansparphase:**
-        - Sparzins: **{sparzins:.2f}%**
-        - Monatlicher Regelsparbeitrag: **{regelsparbeitrag}‰** der Bausparsumme
-        - Abschlussgebühr: **{abschlussgebuehr:.2f}%** der Bausparsumme
-        - Jahresentgelt: **{jahresentgelt:.2f} €** pro 1.000 € Bausparsumme (max. 30 € pro Jahr)
-
-        **Darlehensphase:**
-        - Fester Sollzins: **{darlehenszins:.2f}%**
-        - Zins- und Tilgungsbeitrag: **{zins_tilgung}‰** der Bausparsumme (monatlich)
-        """
-    )
-
 # Funktionsdefinition für den Tarifrechner
 def tarif_rechner(name, sparzins, regelsparbeitrag, abschlussgebuehr, jahresentgelt, zins_tilgung, darlehenszins):
     st.title(f"🏠 LBS Bausparrechner – {name}")
@@ -106,25 +74,24 @@ def tarif_rechner(name, sparzins, regelsparbeitrag, abschlussgebuehr, jahresentg
             bausparsumme, monatlicher_sparbeitrag, sparzins, abschlussgebuehr, jahresentgelt, einmalzahlung
         )
 
-        # Warnung und Lösungsvorschlag, wenn die gewünschte Zuteilungszeit nicht erreicht wird
-        if monate_anspar / 12 > zuteilungszeit:
-            required_rate = calculate_required_rate(
-                bausparsumme, sparzins, abschlussgebuehr, jahresentgelt, einmalzahlung, zuteilungszeit
-            )
-            st.warning(
-                f"⚠️ Die gewünschte Zuteilungszeit von **{zuteilungszeit} Jahren** kann nicht eingehalten werden. "
-                f"Die tatsächliche Ansparzeit beträgt **{monate_anspar / 12:.1f} Jahre**.\n"
-                f"💡 Um die Zuteilungszeit zu erreichen, müsste Ihre monatliche Sparrate **{required_rate:.2f} €** betragen."
-            )
+        # Berechnung der Zuteilungszeit basierend auf dem Regelsparbeitrag
+        monate_regelspar, _, _, _ = calculate_ansparphase(
+            bausparsumme, vorschlag_sparrate, sparzins, abschlussgebuehr, jahresentgelt, einmalzahlung
+        )
+        zuteilungsdatum = datetime.now() + timedelta(days=(monate_regelspar * 30))  # Datum berechnen
 
         # Ergebnisse anzeigen
         st.markdown("## 📋 Ergebnisse")
         st.markdown(
             f"""
             ### 🏦 Ansparphase
-            - Dauer bis zur Zuteilung: **{monate_anspar // 12} Jahre und {monate_anspar % 12} Monate**
+            - Dauer bis zur Zuteilung (gewählte Sparrate): **{monate_anspar // 12} Jahre und {monate_anspar % 12} Monate**
             - Gesamtes Sparguthaben inkl. Einmalzahlung: **{guthaben:,.2f} €**
             - Insgesamt erhaltene Zinsen: **{zinsen_anspar:,.2f} €**
+
+            ### 📅 Zuteilungszeit bei Regelsparbeitrag
+            - Dauer bis zur Zuteilung: **{monate_regelspar // 12} Jahre und {monate_regelspar % 12} Monate**
+            - Voraussichtliches Zuteilungsdatum: **{zuteilungsdatum.strftime('%d.%m.%Y')}**
             """
         )
 
@@ -158,20 +125,15 @@ tarif = st.radio(
 
 # Tarifdetails und Berechnungen
 if tarif == "Classic20 F3":
-    show_tarif_details("Classic20 F3", sparzins=0.05, regelsparbeitrag=3, abschlussgebuehr=1.6, jahresentgelt=0.30, zins_tilgung=3.5, darlehenszins=2.25)
     tarif_rechner("Classic20 F3", sparzins=0.05, regelsparbeitrag=3, abschlussgebuehr=1.6, jahresentgelt=0.30, zins_tilgung=3.5, darlehenszins=2.25)
 elif tarif == "Sprint22":
-    show_tarif_details("Sprint22", sparzins=0.05, regelsparbeitrag=7, abschlussgebuehr=1.6, jahresentgelt=0.30, zins_tilgung=6, darlehenszins=1.75)
     tarif_rechner("Sprint22", sparzins=0.05, regelsparbeitrag=7, abschlussgebuehr=1.6, jahresentgelt=0.30, zins_tilgung=6, darlehenszins=1.75)
 elif tarif == "Komfort22":
-    show_tarif_details("Komfort22", sparzins=0.05, regelsparbeitrag=3, abschlussgebuehr=1.6, jahresentgelt=0.30, zins_tilgung=7, darlehenszins=2.35)
     tarif_rechner("Komfort22", sparzins=0.05, regelsparbeitrag=3, abschlussgebuehr=1.6, jahresentgelt=0.30, zins_tilgung=7, darlehenszins=2.35)
 elif tarif == "Classic20 F8":
-    show_tarif_details("Classic20 F8", sparzins=0.05, regelsparbeitrag=3, abschlussgebuehr=1.6, jahresentgelt=0.30, zins_tilgung=8, darlehenszins=0.95)
     tarif_rechner("Classic20 F8", sparzins=0.05, regelsparbeitrag=3, abschlussgebuehr=1.6, jahresentgelt=0.30, zins_tilgung=8, darlehenszins=0.95)
 elif tarif == "Classic20 Plus F":
-    show_tarif_details("Classic20 Plus F", sparzins=0.01, regelsparbeitrag=4, abschlussgebuehr=1.6, jahresentgelt=0.30, zins_tilgung=5, darlehenszins=1.65)
     tarif_rechner("Classic20 Plus F", sparzins=0.01, regelsparbeitrag=4, abschlussgebuehr=1.6, jahresentgelt=0.30, zins_tilgung=5, darlehenszins=1.65)
 elif tarif == "Spar25":
-    show_tarif_details("Spar25", sparzins=0.25, regelsparbeitrag=5, abschlussgebuehr=1.6, jahresentgelt=0.30, zins_tilgung=6, darlehenszins=4.25)
     tarif_rechner("Spar25", sparzins=0.25, regelsparbeitrag=5, abschlussgebuehr=1.6, jahresentgelt=0.30, zins_tilgung=6, darlehenszins=4.25)
+
