@@ -84,7 +84,7 @@ def display_tarif_konditionen(name, sparzins, regelsparbeitrag, abschlussgebuehr
 
 # Hauptrechner
 def tarif_rechner(name, sparzins, regelsparbeitrag, abschlussgebuehr, jahresentgelt, zins_tilgung, darlehenszins):
-    st.title(f"🏠 LBS Bausparrechner – {name}")
+    st.title(f"🏡 LBS Bausparrechner – {name}")
     
     bausparsumme = st.number_input("💰 Bausparsumme (€):", min_value=10000, max_value=500000, step=1000)
     if bausparsumme:
@@ -156,7 +156,7 @@ def tarif_rechner(name, sparzins, regelsparbeitrag, abschlussgebuehr, jahresentg
         st.pyplot(plt)
 
 # Hauptmenü und Tarifauswahl
-st.title("🏠 LBS Bausparrechner")
+st.title("🏡 LBS Bausparrechner")
 st.markdown("Wählen Sie einen Tarif aus, um die Berechnungen zu starten.")
 
 tarif = st.radio(
