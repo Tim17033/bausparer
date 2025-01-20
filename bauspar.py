@@ -1,142 +1,75 @@
 import streamlit as st
 import time
 
-# Funktionsdefinition für jeden Tarifrechner
-def tarif_rechner(name, sparzins, regelsparbeitrag, mindestsparung, mindestsparzeit, abschlussgebuehr, jahresentgelt, darlehenszins, zins_tilgung):
-    st.title(f"🏠 LBS Bausparrechner – {name}")
+# Tarifinformationen
+TARIFE = {
+    "Classic20 F3": {"regelsparbeitrag": 3, "mindestsparung": 40, "mindestsparzeit": 1.5, "abschlussgebuehr": 1.6, "jahresentgelt": 0.30, "darlehenszins": 2.25, "zins_tilgung": 3.5},
+    "Sprint22": {"regelsparbeitrag": 7, "mindestsparung": 50, "mindestsparzeit": 1.5, "abschlussgebuehr": 1.6, "jahresentgelt": 0.30, "darlehenszins": 1.75, "zins_tilgung": 6},
+    "Komfort22": {"regelsparbeitrag": 3, "mindestsparung": 30, "mindestsparzeit": 1.5, "abschlussgebuehr": 1.6, "jahresentgelt": 0.30, "darlehenszins": 2.35, "zins_tilgung": 7},
+    "Classic20 F8": {"regelsparbeitrag": 3, "mindestsparung": 40, "mindestsparzeit": 1.5, "abschlussgebuehr": 1.6, "jahresentgelt": 0.30, "darlehenszins": 0.95, "zins_tilgung": 8},
+    "Classic20 Plus F": {"regelsparbeitrag": 4, "mindestsparung": 40, "mindestsparzeit": 1.5, "abschlussgebuehr": 1.6, "jahresentgelt": 0.30, "darlehenszins": 1.65, "zins_tilgung": 5},
+    "Spar25": {"regelsparbeitrag": 5, "mindestsparung": 40, "mindestsparzeit": 1.5, "abschlussgebuehr": 1.6, "jahresentgelt": 0.30, "darlehenszins": 4.25, "zins_tilgung": 6}
+}
 
-    # Ansparphase
-    st.markdown("### 🏦 Ansparphase")
-    st.markdown(f"- **Sparzins:** {sparzins}% p.a.")
-    st.markdown(f"- **Regelsparbeitrag:** {regelsparbeitrag}‰ der Bausparsumme")
-    st.markdown(f"- **Mindestsparung:** {mindestsparung}% der Bausparsumme")
-    st.markdown(f"- **Mindestsparzeit:** {mindestsparzeit}")
-    st.markdown(f"- **Abschlussgebühr:** {abschlussgebuehr}% der Bausparsumme")
-    st.markdown(f"- **Jahresentgelt:** {jahresentgelt} € pro Jahr pro 1.000 € Bausparsumme (max. 30 €)")
+# Tarifauswahl basierend auf Eingaben
+def finde_tarif(bausparsumme, monatliche_rate, zuteilung):
+    passende_tarife = []
+    for tarif, details in TARIFE.items():
+        if monatliche_rate >= bausparsumme * details["regelsparbeitrag"] / 1000 and zuteilung >= details["mindestsparzeit"]:
+            passende_tarife.append(tarif)
+    return passende_tarife
 
-    # Darlehensphase
-    st.markdown("### 💳 Darlehensphase")
-    st.markdown(f"- **Darlehenszins:** {darlehenszins}% p.a.")
-    st.markdown(f"- **Zins- und Tilgungsbeitrag:** {zins_tilgung}‰ der Bausparsumme (monatlich)")
+# Berechnungen für Anspar- und Darlehensphase
+def berechnung_tarif(tarif, bausparsumme, einmalzahlung):
+    details = TARIFE[tarif]
+    monatlicher_sparbeitrag = bausparsumme * details["regelsparbeitrag"] / 1000
+    abschlussgebuehr_betrag = bausparsumme * details["abschlussgebuehr"] / 100
+    jahresentgelt_betrag = min((bausparsumme / 1000) * details["jahresentgelt"], 30)
+    mindestsparguthaben = bausparsumme * details["mindestsparung"] / 100
 
-    # Eingaben für den spezifischen Tarif
-    bausparsumme = st.number_input("💰 Bausparsumme (€):", min_value=10000, max_value=500000, step=1000)
-    einmalzahlung = st.number_input("💵 Einmalzahlung zu Beginn (€):", min_value=0, step=100)
+    return {
+        "tarif": tarif,
+        "monatlicher_sparbeitrag": monatlicher_sparbeitrag,
+        "abschlussgebuehr": abschlussgebuehr_betrag,
+        "jahresentgelt": jahresentgelt_betrag,
+        "mindestsparguthaben": mindestsparguthaben + einmalzahlung
+    }
 
-    # Berechnung starten
-    if st.button("📊 Berechnung starten"):
-        with st.spinner("🔄 Berechnung wird durchgeführt..."):
-            time.sleep(2)  # Simulierte Ladezeit
+# App-Start
+st.title("🏠 LBS Bausparrechner – Kundenberatung")
+st.markdown("Finden Sie den perfekten Tarif für Ihren Kunden basierend auf seinen Bedürfnissen.")
 
-        # Berechnungen
-        monatlicher_sparbeitrag = bausparsumme * regelsparbeitrag / 1000
-        mindestsparguthaben = bausparsumme * mindestsparung / 100
-        abschlussgebuehr_betrag = bausparsumme * abschlussgebuehr / 100
-        jahresentgelt_betrag = min((bausparsumme / 1000) * jahresentgelt, 30)
+# Fragen an den Kunden
+st.markdown("### 🔍 Fragen an den Kunden")
+ziel = st.selectbox("Wofür möchten Sie den Bausparer nutzen?", ["Eigenheim", "Modernisierung", "Allgemeines Sparen"])
+zuteilung = st.number_input("Wann möchten Sie in die Zuteilung kommen? (in Jahren):", min_value=1.5, step=0.5)
+bausparsumme = st.number_input("Wie hoch soll die Bausparsumme sein? (€):", min_value=10000, step=1000)
+monatliche_rate = st.number_input("Wie viel können Sie monatlich einzahlen? (€):", min_value=50, step=10)
+einmalzahlung = st.number_input("Haben Sie eine Einmalzahlung? (€):", min_value=0, step=100)
 
-        # Ergebnisse anzeigen
+# Tarif finden und berechnen
+if st.button("📊 Tarif berechnen"):
+    with st.spinner("🔄 Wir finden den passenden Tarif..."):
+        time.sleep(2)  # Simulierte Ladezeit
+    tarife = finde_tarif(bausparsumme, monatliche_rate, zuteilung)
+    if tarife:
+        st.success(f"Passende Tarife: {', '.join(tarife)}")
+        tarif = tarife[0]  # Erster passender Tarif wird gewählt
+        ergebnisse = berechnung_tarif(tarif, bausparsumme, einmalzahlung)
+
         st.markdown("## 📋 Ergebnisse")
         st.markdown(
             f"""
-            ### 🏦 Sparphase
-            - Monatlicher Regelsparbeitrag: **{monatlicher_sparbeitrag:,.2f} €**
-            - Mindestsparguthaben: **{mindestsparguthaben:,.2f} €**
-            - Abschlussgebühr: **{abschlussgebuehr_betrag:,.2f} €**
-            - Jahresentgelt: **{jahresentgelt_betrag:,.2f} € pro Jahr**
-            - Gesamtes Sparguthaben inkl. Einmalzahlung: **{mindestsparguthaben + einmalzahlung:,.2f} €**
+            ### 🏦 Ansparphase ({ergebnisse['tarif']})
+            - Monatlicher Sparbeitrag: **{ergebnisse['monatlicher_sparbeitrag']:.2f} €**
+            - Abschlussgebühr: **{ergebnisse['abschlussgebuehr']:.2f} €**
+            - Jahresentgelt: **{ergebnisse['jahresentgelt']:.2f} €**
+            - Gesamtes Sparguthaben inkl. Einmalzahlung: **{ergebnisse['mindestsparguthaben']:.2f} €**
             """
         )
+    else:
+        st.error("Kein Tarif passt zu den Eingaben. Bitte prüfen Sie die monatliche Rate oder die Zuteilungszeit.")
 
-# Hauptmenü
-st.title("🏠 LBS Bausparrechner")
-st.markdown("Wählen Sie einen Tarif aus, um die Berechnungen zu starten.")
-
-# Tarifauswahl
-tarif = st.radio(
-    "Tarif auswählen:",
-    [
-        "Classic20 F3",
-        "Sprint22",
-        "Komfort22",
-        "Classic20 F8",
-        "Classic20 Plus F",
-        "Spar25"
-    ]
-)
-
-# Tarif-Bedingungen und spezifische Berechnungen
-if tarif == "Classic20 F3":
-    tarif_rechner(
-        name="Classic20 F3",
-        sparzins=0.05,
-        regelsparbeitrag=3,
-        mindestsparung=40,
-        mindestsparzeit="1 J. 6 Mo.",
-        abschlussgebuehr=1.6,
-        jahresentgelt=0.30,
-        darlehenszins=2.25,
-        zins_tilgung=3.5
-    )
-elif tarif == "Sprint22":
-    tarif_rechner(
-        name="Sprint22",
-        sparzins=0.05,
-        regelsparbeitrag=7,
-        mindestsparung=50,
-        mindestsparzeit="1 J. 6 Mo.",
-        abschlussgebuehr=1.6,
-        jahresentgelt=0.30,
-        darlehenszins=1.75,
-        zins_tilgung=6
-    )
-elif tarif == "Komfort22":
-    tarif_rechner(
-        name="Komfort22",
-        sparzins=0.05,
-        regelsparbeitrag=3,
-        mindestsparung=30,
-        mindestsparzeit="1 J. 6 Mo.",
-        abschlussgebuehr=1.6,
-        jahresentgelt=0.30,
-        darlehenszins=2.35,
-        zins_tilgung=7
-    )
-elif tarif == "Classic20 F8":
-    tarif_rechner(
-        name="Classic20 F8",
-        sparzins=0.05,
-        regelsparbeitrag=3,
-        mindestsparung=40,
-        mindestsparzeit="1 J. 6 Mo.",
-        abschlussgebuehr=1.6,
-        jahresentgelt=0.30,
-        darlehenszins=0.95,
-        zins_tilgung=8
-    )
-elif tarif == "Classic20 Plus F":
-    tarif_rechner(
-        name="Classic20 Plus F",
-        sparzins=0.01,
-        regelsparbeitrag=4,
-        mindestsparung=40,
-        mindestsparzeit="1 J. 6 Mo.",
-        abschlussgebuehr=1.6,
-        jahresentgelt=0.30,
-        darlehenszins=1.65,
-        zins_tilgung=5
-    )
-elif tarif == "Spar25":
-    tarif_rechner(
-        name="Spar25",
-        sparzins=0.25,
-        regelsparbeitrag=5,
-        mindestsparung=40,
-        mindestsparzeit="1 J. 6 Mo.",
-        abschlussgebuehr=1.6,
-        jahresentgelt=0.30,
-        darlehenszins=4.25,
-        zins_tilgung=6
-    )
 
 
 
