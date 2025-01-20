@@ -25,8 +25,15 @@ def calculate_ansparphase(bausparsumme, monatlicher_sparbeitrag, sparzins, absch
 
     return monate, restbetrag, zinsen_gesamt, guthaben_verlauf
 
-# Anzeige der Tarif-Eckdaten
-def show_tarif_details(tarif_name, sparzins, regelsparbeitrag, abschlussgebuehr, jahresentgelt, zins_tilgung, darlehenszins):
+# Anzeige der Tarif-Eckdaten inkl. Zuteilungszeit bei Regelsparbeitrag
+def show_tarif_details(tarif_name, sparzins, regelsparbeitrag, abschlussgebuehr, jahresentgelt, zins_tilgung, darlehenszins, bausparsumme):
+    # Berechnung der Zuteilungszeit bei Regelsparbeitrag
+    vorschlag_sparrate = bausparsumme * regelsparbeitrag / 1000
+    monate_regelspar, _, _, _ = calculate_ansparphase(
+        bausparsumme, vorschlag_sparrate, sparzins, abschlussgebuehr, jahresentgelt, einmalzahlung=0
+    )
+    zuteilungsdatum = datetime.now() + timedelta(days=(monate_regelspar * 30))
+
     st.markdown(f"### Tarifkonditionen – {tarif_name}")
     st.markdown(
         f"""
@@ -35,6 +42,7 @@ def show_tarif_details(tarif_name, sparzins, regelsparbeitrag, abschlussgebuehr,
         - Monatlicher Regelsparbeitrag: **{regelsparbeitrag}‰** der Bausparsumme
         - Abschlussgebühr: **{abschlussgebuehr:.2f}%** der Bausparsumme
         - Jahresentgelt: **{jahresentgelt:.2f} €** pro 1.000 € Bausparsumme (max. 30 € pro Jahr)
+        - Zuteilungszeit bei Regelsparbeitrag: **{monate_regelspar // 12} Jahre und {monate_regelspar % 12} Monate** (ca. **{zuteilungsdatum.strftime('%d.%m.%Y')}**)
 
         **Darlehensphase:**
         - Fester Sollzins: **{darlehenszins:.2f}%**
@@ -55,6 +63,7 @@ def tarif_rechner(name, sparzins, regelsparbeitrag, abschlussgebuehr, jahresentg
         jahresentgelt,
         zins_tilgung,
         darlehenszins,
+        bausparsumme=100000  # Beispielhafte Bausparsumme
     )
 
     # Eingaben des Kunden
@@ -100,12 +109,12 @@ def tarif_rechner(name, sparzins, regelsparbeitrag, abschlussgebuehr, jahresentg
 
             if neue_sparrate > 2000:
                 st.error(
-                    f"Die gewünschte Zuteilungszeit von {zuteilungszeit} Jahren kann leider nicht erreicht werden, "
+                    f"❌ Die gewünschte Zuteilungszeit von **{zuteilungszeit} Jahren** kann leider nicht erreicht werden, "
                     f"da die erforderliche Sparrate den maximalen Wert überschreiten würde."
                 )
             else:
                 st.warning(
-                    f"Die gewünschte Zuteilungszeit von {zuteilungszeit} Jahren kann mit der aktuellen Sparrate nicht erreicht werden. "
+                    f"⚠️ Die gewünschte Zuteilungszeit von **{zuteilungszeit} Jahren** kann mit der aktuellen Sparrate nicht erreicht werden. "
                     f"Um die Zuteilung in der gewünschten Zeit zu schaffen, müsste die monatliche Sparrate mindestens **{neue_sparrate:.2f} €** betragen."
                 )
 
@@ -161,6 +170,7 @@ elif tarif == "Classic20 Plus F":
     tarif_rechner("Classic20 Plus F", sparzins=0.01, regelsparbeitrag=4, abschlussgebuehr=1.6, jahresentgelt=0.30, zins_tilgung=5, darlehenszins=1.65)
 elif tarif == "Spar25":
     tarif_rechner("Spar25", sparzins=0.25, regelsparbeitrag=5, abschlussgebuehr=1.6, jahresentgelt=0.30, zins_tilgung=6, darlehenszins=4.25)
+
 
 
 
