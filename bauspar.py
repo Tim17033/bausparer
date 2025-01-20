@@ -9,7 +9,7 @@ def display_tarif_konditionen(name, sparzins, regelsparbeitrag, abschlussgebuehr
 
     st.markdown(f"## Tarifkonditionen – {name}")
     st.markdown("### Ansparphase:")
-    st.write(f"- **Sparzins**: {sparzins:.2%}")
+    st.write(f"- **Sparzins**: {sparzins:.3%}")
     st.write(f"- **Monatlicher Regelsparbeitrag**: {regelsparbeitrag}‰ der Bausparsumme")
     st.write(f"- **Abschlussgebühr**: {abschlussgebuehr:.2%} der Bausparsumme")
     st.write(f"- **Jahresentgelt**: {jahresentgelt:.2f} € pro 1.000 € Bausparsumme (max. 30 € pro Jahr)")
@@ -18,6 +18,7 @@ def display_tarif_konditionen(name, sparzins, regelsparbeitrag, abschlussgebuehr
     st.markdown("### Darlehensphase:")
     st.write(f"- **Fester Sollzins**: {sollzins:.2%}")
     st.write(f"- **Monatliche Zins- und Tilgungsrate**: {regelsparbeitrag:.1f}‰ der Bausparsumme")
+
 
 # Hauptcode
 st.title("LBS Bausparrechner")
@@ -29,7 +30,7 @@ tarif = st.radio("Verfügbare Tarife:", ["Classic20 F3", "Sprint22", "Komfort22"
 # Tarifdaten
 if tarif == "Classic20 F3":
     tarif_name = "Classic20 F3"
-    sparzins = 0.05
+    sparzins = 0.0005  # 0.05% Zins
     regelsparbeitrag = 3
     abschlussgebuehr = 1.6
     jahresentgelt = 0.30
@@ -37,13 +38,44 @@ if tarif == "Classic20 F3":
     sollzins = 2.25
 elif tarif == "Sprint22":
     tarif_name = "Sprint22"
-    sparzins = 0.05
+    sparzins = 0.0005  # 0.05% Zins
     regelsparbeitrag = 7
     abschlussgebuehr = 1.6
     jahresentgelt = 0.30
     regelsparzeit = 6.00  # 6 Jahre
     sollzins = 1.75
-# Weitere Tarife hinzufügen...
+elif tarif == "Komfort22":
+    tarif_name = "Komfort22"
+    sparzins = 0.0005  # 0.05% Zins
+    regelsparbeitrag = 3
+    abschlussgebuehr = 1.6
+    jahresentgelt = 0.30
+    regelsparzeit = 8.5  # 8 Jahre und 6 Monate
+    sollzins = 2.35
+elif tarif == "Classic20 F8":
+    tarif_name = "Classic20 F8"
+    sparzins = 0.0005  # 0.05% Zins
+    regelsparbeitrag = 3
+    abschlussgebuehr = 1.6
+    jahresentgelt = 0.30
+    regelsparzeit = 11.25  # 11 Jahre und 3 Monate
+    sollzins = 0.95
+elif tarif == "Classic20 Plus F":
+    tarif_name = "Classic20 Plus F"
+    sparzins = 0.0001  # 0.01% Zins
+    regelsparbeitrag = 4
+    abschlussgebuehr = 1.6
+    jahresentgelt = 0.30
+    regelsparzeit = 8.5  # 8 Jahre und 6 Monate
+    sollzins = 1.65
+elif tarif == "Spar25":
+    tarif_name = "Spar25"
+    sparzins = 0.0025  # 0.25% Zins
+    regelsparbeitrag = 5
+    abschlussgebuehr = 1.6
+    jahresentgelt = 0.30
+    regelsparzeit = 10.33  # 10 Jahre und 4 Monate
+    sollzins = 4.25
 
 # Tarifkonditionen anzeigen
 display_tarif_konditionen(tarif_name, sparzins, regelsparbeitrag, abschlussgebuehr, jahresentgelt, regelsparzeit, sollzins)
@@ -76,6 +108,7 @@ if st.button("Berechnung starten"):
                 f"Die Zuteilungszeit von **{gew_zuteilung} Jahren** kann eingehalten werden! "
                 f"Ihre aktuelle Sparrate ist ausreichend. 🎉"
             )
+
 
 
 
