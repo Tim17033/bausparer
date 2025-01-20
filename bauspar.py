@@ -41,6 +41,21 @@ def calculate_darlehensphase(bausparsumme, darlehenszins, zins_tilgung):
     df = pd.DataFrame(data)
     return df
 
+# Berechnung der erforderlichen Sparrate
+def calculate_required_sparrate(bausparsumme, sparzins, abschlussgebuehr, jahresentgelt, einmalzahlung, gewünschte_zuteilung_jahre):
+    restbetrag = -abschlussgebuehr + einmalzahlung
+    mindestsparguthaben = bausparsumme * 0.4
+    monate = int(gewünschte_zuteilung_jahre * 12)
+    required_sparrate = 0
+
+    for _ in range(monate):
+        zinsen = max(0, restbetrag) * (sparzins / 100 / 12)
+        jahresentgelt_betrag = min((bausparsumme / 1000) * jahresentgelt, 30) / 12
+        required_sparrate = (mindestsparguthaben - restbetrag) / monate + jahresentgelt_betrag - zinsen
+        restbetrag += required_sparrate - jahresentgelt_betrag + zinsen
+
+    return max(required_sparrate, 50)
+
 # Tarifdetails anzeigen
 def display_tarif_konditionen(tarif_name, sparzins, regelsparbeitrag, abschlussgebuehr, jahresentgelt, zins_tilgung, darlehenszins, bausparsumme, einmalzahlung):
     vorschlag_sparrate = bausparsumme * regelsparbeitrag / 1000
@@ -70,7 +85,6 @@ def display_tarif_konditionen(tarif_name, sparzins, regelsparbeitrag, abschlussg
 def tarif_rechner(name, sparzins, regelsparbeitrag, abschlussgebuehr, jahresentgelt, zins_tilgung, darlehenszins):
     st.title(f"🏠 LBS Bausparrechner – {name}")
     
-    # Eingabe der Bausparsumme
     bausparsumme = st.number_input("💰 Bausparsumme (€):", min_value=10000, max_value=500000, step=1000)
     if bausparsumme:
         vorschlag_sparrate = max(bausparsumme * regelsparbeitrag / 1000, 10)
@@ -101,7 +115,9 @@ def tarif_rechner(name, sparzins, regelsparbeitrag, abschlussgebuehr, jahresentg
         regelsparzeit_monate = len(regelspar_df)
 
         if monate_anspar / 12 > zuteilungszeit:
-            erforderliche_sparrate = monatlicher_sparbeitrag + 10
+            erforderliche_sparrate = calculate_required_sparrate(
+                bausparsumme, sparzins, abschlussgebuehr, jahresentgelt, einmalzahlung, zuteilungszeit
+            )
             st.warning(
                 f"⚠️ Die gewünschte Zuteilungszeit von **{zuteilungszeit:.1f} Jahren** kann nicht eingehalten werden. "
                 f"Tatsächliche Ansparzeit: **{monate_anspar // 12} Jahre und {monate_anspar % 12} Monate**. "
@@ -125,15 +141,6 @@ def tarif_rechner(name, sparzins, regelsparbeitrag, abschlussgebuehr, jahresentg
             - Laufzeit: **{laufzeit_darlehen // 12} Jahre und {laufzeit_darlehen % 12} Monate**
             """
         )
-
-        plt.figure(figsize=(10, 5))
-        plt.plot(df_anspar["Monat"], df_anspar["Guthaben"], label="Guthaben inkl. Zinsen", color="green")
-        plt.axhline(y=bausparsumme * 0.4, color="blue", linestyle="--", label="Mindestsparguthaben (40%)")
-        plt.xlabel("Monate")
-        plt.ylabel("Guthaben (€)")
-        plt.title("Ansparverlauf")
-        plt.legend()
-        st.pyplot(plt)
 
 # Menü
 st.title("🏠 LBS Bausparrechner")
@@ -163,6 +170,7 @@ elif tarif == "Classic20 Plus F":
 elif tarif == "Spar25":
     display_tarif_konditionen("Spar25", 0.25, 5, 1.6, 0.30, 6, 4.25, 10000, 0)
     tarif_rechner("Spar25", 0.25, 5, 1.6, 0.30, 6, 4.25)
+
 
 
 
