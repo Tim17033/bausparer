@@ -59,6 +59,7 @@ def calculate_required_sparrate(bausparsumme, sparzins, abschlussgebuehr, jahres
 # Tarifdetails anzeigen
 def display_tarif_konditionen(tarif_name, sparzins, regelsparbeitrag, abschlussgebuehr, jahresentgelt, zins_tilgung, darlehenszins, bausparsumme, einmalzahlung):
     vorschlag_sparrate = bausparsumme * regelsparbeitrag / 1000
+    mindestsparguthaben = bausparsumme * 0.4
     df_anspar = calculate_ansparphase(
         bausparsumme, vorschlag_sparrate, sparzins, abschlussgebuehr, jahresentgelt, einmalzahlung
     )
@@ -71,6 +72,7 @@ def display_tarif_konditionen(tarif_name, sparzins, regelsparbeitrag, abschlussg
         **Ansparphase:**
         - Sparzins: **{sparzins:.2f}%**
         - Monatlicher Regelsparbeitrag: **{regelsparbeitrag}‰** der Bausparsumme
+        - Mindestansparsumme (40% der Bausparsumme): **{mindestsparguthaben:,.2f} €**
         - Abschlussgebühr: **{abschlussgebuehr:.2f}%** der Bausparsumme
         - Jahresentgelt: **{jahresentgelt:.2f} €** pro 1.000 € Bausparsumme (max. 30 € pro Jahr)
         - Zuteilungszeit bei Regelsparbeitrag: **{monate_regelspar // 12} Jahre und {monate_regelspar % 12} Monate** (ca. **{zuteilungsdatum.strftime('%d.%m.%Y')}**)
@@ -170,6 +172,7 @@ elif tarif == "Classic20 Plus F":
 elif tarif == "Spar25":
     display_tarif_konditionen("Spar25", 0.25, 5, 1.6, 0.30, 6, 4.25, 10000, 0)
     tarif_rechner("Spar25", 0.25, 5, 1.6, 0.30, 6, 4.25)
+
 
 
 
