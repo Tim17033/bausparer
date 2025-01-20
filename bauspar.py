@@ -5,7 +5,7 @@ import pandas as pd
 from datetime import datetime, timedelta
 import time
 
-# Berechnung der Ansparphase mit Pandas
+# Berechnung der Ansparphase
 def calculate_ansparphase_with_pandas(bausparsumme, monatlicher_sparbeitrag, sparzins, abschlussgebuehr, jahresentgelt, einmalzahlung):
     restbetrag = -abschlussgebuehr + einmalzahlung
     mindestsparguthaben = bausparsumme * 0.4
@@ -24,7 +24,7 @@ def calculate_ansparphase_with_pandas(bausparsumme, monatlicher_sparbeitrag, spa
     df = pd.DataFrame(data)
     return df
 
-# Berechnung der Darlehensphase mit Pandas
+# Berechnung der Darlehensphase
 def calculate_darlehensphase_with_pandas(bausparsumme, darlehenszins, zins_tilgung):
     darlehensbetrag = bausparsumme * 0.6
     monatliche_rate = bausparsumme * zins_tilgung / 1000
@@ -71,18 +71,6 @@ def show_tarif_details(tarif_name, sparzins, regelsparbeitrag, abschlussgebuehr,
 def tarif_rechner(name, sparzins, regelsparbeitrag, abschlussgebuehr, jahresentgelt, zins_tilgung, darlehenszins):
     st.title(f"🏠 LBS Bausparrechner – {name}")
     
-    show_tarif_details(
-        name,
-        sparzins,
-        regelsparbeitrag,
-        abschlussgebuehr,
-        jahresentgelt,
-        zins_tilgung,
-        darlehenszins,
-        bausparsumme=100000,  # Beispielhafte Bausparsumme
-        einmalzahlung=0  # Keine Beispielhafte Einmalzahlung
-    )
-
     bausparsumme = st.number_input("💰 Bausparsumme (€):", min_value=10000, max_value=500000, step=1000)
     if bausparsumme:
         vorschlag_sparrate = max(bausparsumme * regelsparbeitrag / 1000, 50)
@@ -110,9 +98,15 @@ def tarif_rechner(name, sparzins, regelsparbeitrag, abschlussgebuehr, jahresentg
         monate_anspar = len(df_anspar)
         zinsen_anspar = df_anspar["Zinsen"].sum()
 
-        # Prüfen, ob die gewünschte Zuteilungszeit erreicht wird
+        # Regelsparbeitrag für Vergleich
+        regelsparzeit_df = calculate_ansparphase_with_pandas(
+            bausparsumme, bausparsumme * regelsparbeitrag / 1000, sparzins, abschlussgebuehr, jahresentgelt, einmalzahlung
+        )
+        regelsparzeit_monate = len(regelsparzeit_df)
+
+        # Prüfen, ob gewünschte Zuteilungszeit erreicht wird
         if monate_anspar / 12 > zuteilungszeit:
-            erforderliche_sparrate = monatlicher_sparbeitrag + 10
+            erforderliche_sparrate = monatlicher_sparbeitrag + 10  # Vorschlag
             st.warning(
                 f"⚠️ Die gewünschte Zuteilungszeit von **{zuteilungszeit:.1f} Jahren** kann nicht eingehalten werden. "
                 f"Die tatsächliche Ansparzeit beträgt **{monate_anspar / 12:.1f} Jahre**. "
@@ -173,4 +167,5 @@ elif tarif == "Classic20 Plus F":
     tarif_rechner("Classic20 Plus F", 0.01, 4, 1.6, 0.30, 5, 1.65)
 elif tarif == "Spar25":
     tarif_rechner("Spar25", 0.25, 5, 1.6, 0.30, 6, 4.25)
+
 
