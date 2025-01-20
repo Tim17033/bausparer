@@ -64,12 +64,12 @@ def tarif_rechner(name, sparzins, regelsparbeitrag, abschlussgebuehr, jahresentg
     
     if bausparsumme:
         # Dynamischer Vorschlag basierend auf Regelsparbeitrag
-        vorschlag_sparrate = max(bausparsumme * regelsparbeitrag / 1000, 50.0)
+        vorschlag_sparrate = bausparsumme * regelsparbeitrag / 1000
         
         # Eingabe: Monatliche Sparrate
         monatlicher_sparbeitrag = st.number_input(
             f"📅 Monatliche Sparrate (Vorschlag: {vorschlag_sparrate:.2f} €, Regelsparbeitrag):",
-            min_value=50.0,
+            min_value=10.0,
             max_value=2000.0,
             value=vorschlag_sparrate,  # Dynamischer Standardwert
             step=10.0,
@@ -97,7 +97,7 @@ def tarif_rechner(name, sparzins, regelsparbeitrag, abschlussgebuehr, jahresentg
 
         # Regelsparzeit für Vergleich
         regelsparzeit_df = calculate_ansparphase(
-            bausparsumme, max(bausparsumme * regelsparbeitrag / 1000, 50.0), sparzins, abschlussgebuehr, jahresentgelt, einmalzahlung
+            bausparsumme, bausparsumme * regelsparbeitrag / 1000, sparzins, abschlussgebuehr, jahresentgelt, einmalzahlung
         )
         regelsparzeit_monate = len(regelsparzeit_df)
 
@@ -167,4 +167,5 @@ elif tarif == "Classic20 Plus F":
 elif tarif == "Spar25":
     show_tarif_details("Spar25", 0.25, 5, 1.6, 0.30, 6, 4.25)
     tarif_rechner("Spar25", 0.25, 5, 1.6, 0.30, 6, 4.25)
+
 
