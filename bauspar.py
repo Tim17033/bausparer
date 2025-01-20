@@ -42,7 +42,7 @@ def calculate_darlehensphase(bausparsumme, darlehenszins, zins_tilgung):
     return df
 
 # Tarifdetails anzeigen
-def display_tarif_details(tarif_name, sparzins, regelsparbeitrag, abschlussgebuehr, jahresentgelt, zins_tilgung, darlehenszins, bausparsumme, einmalzahlung):
+def display_tarif_konditionen(tarif_name, sparzins, regelsparbeitrag, abschlussgebuehr, jahresentgelt, zins_tilgung, darlehenszins, bausparsumme, einmalzahlung):
     vorschlag_sparrate = bausparsumme * regelsparbeitrag / 1000
     df_anspar = calculate_ansparphase(
         bausparsumme, vorschlag_sparrate, sparzins, abschlussgebuehr, jahresentgelt, einmalzahlung
@@ -137,6 +137,8 @@ def tarif_rechner(name, sparzins, regelsparbeitrag, abschlussgebuehr, jahresentg
 
 # Menü
 st.title("🏠 LBS Bausparrechner")
+st.markdown("Wählen Sie einen Tarif aus, um die Berechnungen zu starten.")
+
 tarif = st.radio(
     "Tarif auswählen:",
     ["Classic20 F3", "Sprint22", "Komfort22", "Classic20 F8", "Classic20 Plus F", "Spar25"]
@@ -144,6 +146,17 @@ tarif = st.radio(
 
 if tarif == "Classic20 F3":
     tarif_rechner("Classic20 F3", 0.05, 3, 1.6, 0.30, 3.5, 2.25)
+elif tarif == "Sprint22":
+    tarif_rechner("Sprint22", 0.05, 7, 1.6, 0.30, 6, 1.75)
+elif tarif == "Komfort22":
+    tarif_rechner("Komfort22", 0.05, 3, 1.6, 0.30, 7, 2.35)
+elif tarif == "Classic20 F8":
+    tarif_rechner("Classic20 F8", 0.05, 3, 1.6, 0.30, 8, 0.95)
+elif tarif == "Classic20 Plus F":
+    tarif_rechner("Classic20 Plus F", 0.01, 4, 1.6, 0.30, 5, 1.65)
+elif tarif == "Spar25":
+    tarif_rechner("Spar25", 0.25, 5, 1.6, 0.30, 6, 4.25)
+
 
 
 
