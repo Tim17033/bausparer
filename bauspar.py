@@ -1,51 +1,104 @@
 import streamlit as st
+import matplotlib.pyplot as plt
+import numpy as np
 import time
 
-# Funktionsdefinition für jeden Tarifrechner
-def tarif_rechner(name, sparzins, regelsparbeitrag, mindestsparung, mindestsparzeit, abschlussgebuehr, jahresentgelt, darlehenszins, zins_tilgung):
+# Berechnung der Ansparphase
+def calculate_ansparphase(bausparsumme, monatlicher_sparbeitrag, sparzins, abschlussgebuehr, jahresentgelt, einmalzahlung):
+    restbetrag = -abschlussgebuehr  # Anfangswert: Abschlussgebühr
+    monate = 0
+    zinsen_gesamt = 0
+    guthaben_verlauf = [restbetrag]
+
+    # Mindestsparguthaben (z. B. 40 % der Bausparsumme)
+    mindestsparguthaben = bausparsumme * 0.4
+
+    while restbetrag < mindestsparguthaben:
+        zinsen = max(0, restbetrag) * (sparzins / 100 / 12)  # Zinsen nur auf positives Guthaben
+        jahresentgelt_betrag = min((bausparsumme / 1000) * jahresentgelt, 30) / 12  # Monatliches Jahresentgelt
+        sparbetrag = monatlicher_sparbeitrag - jahresentgelt_betrag
+        restbetrag += sparbetrag + zinsen
+        zinsen_gesamt += zinsen
+        monate += 1
+        guthaben_verlauf.append(restbetrag)
+
+    return monate, restbetrag, zinsen_gesamt, guthaben_verlauf
+
+# Berechnung der Darlehensphase
+def calculate_darlehensphase(bausparsumme, zins_tilgung, darlehenszins):
+    darlehensbetrag = bausparsumme * 0.6
+    monatliche_rate = bausparsumme * zins_tilgung / 1000
+    restschuld = darlehensbetrag
+    monate = 0
+    restschuld_verlauf = [restschuld]
+
+    while restschuld > 0:
+        zinsen = restschuld * (darlehenszins / 100 / 12)
+        tilgung = monatliche_rate - zinsen
+        restschuld -= tilgung
+        restschuld_verlauf.append(max(0, restschuld))
+        monate += 1
+
+    return monate, restschuld_verlauf
+
+# Funktionsdefinition für den Tarifrechner
+def tarif_rechner(name, sparzins, regelsparbeitrag, abschlussgebuehr, jahresentgelt, zins_tilgung, darlehenszins):
     st.title(f"🏠 LBS Bausparrechner – {name}")
 
-    # Ansparphase
-    st.markdown("### 🏦 Ansparphase")
-    st.markdown(f"- **Sparzins:** {sparzins}% p.a.")
-    st.markdown(f"- **Regelsparbeitrag:** {regelsparbeitrag}‰ der Bausparsumme")
-    st.markdown(f"- **Mindestsparung:** {mindestsparung}% der Bausparsumme")
-    st.markdown(f"- **Mindestsparzeit:** {mindestsparzeit}")
-    st.markdown(f"- **Abschlussgebühr:** {abschlussgebuehr}% der Bausparsumme")
-    st.markdown(f"- **Jahresentgelt:** {jahresentgelt} € pro Jahr pro 1.000 € Bausparsumme (max. 30 €)")
-
-    # Darlehensphase
-    st.markdown("### 💳 Darlehensphase")
-    st.markdown(f"- **Darlehenszins:** {darlehenszins}% p.a.")
-    st.markdown(f"- **Zins- und Tilgungsbeitrag:** {zins_tilgung}‰ der Bausparsumme (monatlich)")
-
-    # Eingaben für den spezifischen Tarif
+    # Eingaben des Kunden
     bausparsumme = st.number_input("💰 Bausparsumme (€):", min_value=10000, max_value=500000, step=1000)
-    einmalzahlung = st.number_input("💵 Einmalzahlung zu Beginn (€):", min_value=0, step=100)
+    monatlicher_sparbeitrag = st.number_input("📅 Monatliche Rate (€):", min_value=50, max_value=2000, step=50)
+    einmalzahlung = st.number_input("💵 Einmalzahlung (€):", min_value=0, step=100)
 
-    # Berechnung starten
     if st.button("📊 Berechnung starten"):
         with st.spinner("🔄 Berechnung wird durchgeführt..."):
             time.sleep(2)  # Simulierte Ladezeit
 
-        # Berechnungen
-        monatlicher_sparbeitrag = bausparsumme * regelsparbeitrag / 1000
-        mindestsparguthaben = bausparsumme * mindestsparung / 100
-        abschlussgebuehr_betrag = bausparsumme * abschlussgebuehr / 100
-        jahresentgelt_betrag = min((bausparsumme / 1000) * jahresentgelt, 30)
+        # Ansparphase berechnen
+        monate_anspar, guthaben, zinsen_anspar, guthaben_verlauf = calculate_ansparphase(
+            bausparsumme, monatlicher_sparbeitrag, sparzins, abschlussgebuehr, jahresentgelt, einmalzahlung
+        )
+
+        # Darlehensphase berechnen
+        monate_darlehen, restschuld_verlauf = calculate_darlehensphase(
+            bausparsumme, zins_tilgung, darlehenszins
+        )
 
         # Ergebnisse anzeigen
         st.markdown("## 📋 Ergebnisse")
         st.markdown(
             f"""
-            ### 🏦 Sparphase
-            - Monatlicher Regelsparbeitrag: **{monatlicher_sparbeitrag:,.2f} €**
-            - Mindestsparguthaben: **{mindestsparguthaben:,.2f} €**
-            - Abschlussgebühr: **{abschlussgebuehr_betrag:,.2f} €**
-            - Jahresentgelt: **{jahresentgelt_betrag:,.2f} € pro Jahr**
-            - Gesamtes Sparguthaben inkl. Einmalzahlung: **{mindestsparguthaben + einmalzahlung:,.2f} €**
+            ### 🏦 Ansparphase
+            - Dauer bis zur Zuteilung: **{monate_anspar // 12} Jahre und {monate_anspar % 12} Monate**
+            - Gesamtes Sparguthaben inkl. Einmalzahlung: **{guthaben:,.2f} €**
+            - Insgesamt erhaltene Zinsen: **{zinsen_anspar:,.2f} €**
+
+            ### 💳 Darlehensphase
+            - Monatliche Rate: **{bausparsumme * zins_tilgung / 1000:,.2f} €**
+            - Dauer der Darlehensphase: **{monate_darlehen // 12} Jahre und {monate_darlehen % 12} Monate**
             """
         )
+
+        # Ansparphase visualisieren
+        st.markdown("### 📊 Ansparverlauf")
+        plt.figure(figsize=(10, 5))
+        plt.plot(np.arange(len(guthaben_verlauf)), guthaben_verlauf, label="Guthaben inkl. Zinsen", color="green")
+        plt.axhline(y=bausparsumme * 0.4, color="blue", linestyle="--", label="Mindestsparguthaben (40%)")
+        plt.title("Ansparverlauf")
+        plt.xlabel("Monate")
+        plt.ylabel("Guthaben (€)")
+        plt.legend()
+        st.pyplot(plt)
+
+        # Darlehensphase visualisieren
+        st.markdown("### 📊 Darlehensverlauf")
+        plt.figure(figsize=(10, 5))
+        plt.plot(np.arange(len(restschuld_verlauf)), restschuld_verlauf, label="Restschuld", color="red")
+        plt.title("Darlehensverlauf")
+        plt.xlabel("Monate")
+        plt.ylabel("Restschuld (€)")
+        plt.legend()
+        st.pyplot(plt)
 
 # Hauptmenü
 st.title("🏠 LBS Bausparrechner")
@@ -64,79 +117,20 @@ tarif = st.radio(
     ]
 )
 
-# Tarif-Bedingungen und spezifische Berechnungen
+# Tarifdetails und Berechnungen
 if tarif == "Classic20 F3":
-    tarif_rechner(
-        name="Classic20 F3",
-        sparzins=0.05,
-        regelsparbeitrag=3,
-        mindestsparung=40,
-        mindestsparzeit="1 J. 6 Mo.",
-        abschlussgebuehr=1.6,
-        jahresentgelt=0.30,
-        darlehenszins=2.25,
-        zins_tilgung=3.5
-    )
+    tarif_rechner("Classic20 F3", sparzins=0.05, regelsparbeitrag=3, abschlussgebuehr=1.6, jahresentgelt=0.30, zins_tilgung=3.5, darlehenszins=2.25)
 elif tarif == "Sprint22":
-    tarif_rechner(
-        name="Sprint22",
-        sparzins=0.05,
-        regelsparbeitrag=7,
-        mindestsparung=50,
-        mindestsparzeit="1 J. 6 Mo.",
-        abschlussgebuehr=1.6,
-        jahresentgelt=0.30,
-        darlehenszins=1.75,
-        zins_tilgung=6
-    )
+    tarif_rechner("Sprint22", sparzins=0.05, regelsparbeitrag=7, abschlussgebuehr=1.6, jahresentgelt=0.30, zins_tilgung=6, darlehenszins=1.75)
 elif tarif == "Komfort22":
-    tarif_rechner(
-        name="Komfort22",
-        sparzins=0.05,
-        regelsparbeitrag=3,
-        mindestsparung=30,
-        mindestsparzeit="1 J. 6 Mo.",
-        abschlussgebuehr=1.6,
-        jahresentgelt=0.30,
-        darlehenszins=2.35,
-        zins_tilgung=7
-    )
+    tarif_rechner("Komfort22", sparzins=0.05, regelsparbeitrag=3, abschlussgebuehr=1.6, jahresentgelt=0.30, zins_tilgung=7, darlehenszins=2.35)
 elif tarif == "Classic20 F8":
-    tarif_rechner(
-        name="Classic20 F8",
-        sparzins=0.05,
-        regelsparbeitrag=3,
-        mindestsparung=40,
-        mindestsparzeit="1 J. 6 Mo.",
-        abschlussgebuehr=1.6,
-        jahresentgelt=0.30,
-        darlehenszins=0.95,
-        zins_tilgung=8
-    )
+    tarif_rechner("Classic20 F8", sparzins=0.05, regelsparbeitrag=3, abschlussgebuehr=1.6, jahresentgelt=0.30, zins_tilgung=8, darlehenszins=0.95)
 elif tarif == "Classic20 Plus F":
-    tarif_rechner(
-        name="Classic20 Plus F",
-        sparzins=0.01,
-        regelsparbeitrag=4,
-        mindestsparung=40,
-        mindestsparzeit="1 J. 6 Mo.",
-        abschlussgebuehr=1.6,
-        jahresentgelt=0.30,
-        darlehenszins=1.65,
-        zins_tilgung=5
-    )
+    tarif_rechner("Classic20 Plus F", sparzins=0.01, regelsparbeitrag=4, abschlussgebuehr=1.6, jahresentgelt=0.30, zins_tilgung=5, darlehenszins=1.65)
 elif tarif == "Spar25":
-    tarif_rechner(
-        name="Spar25",
-        sparzins=0.25,
-        regelsparbeitrag=5,
-        mindestsparung=40,
-        mindestsparzeit="1 J. 6 Mo.",
-        abschlussgebuehr=1.6,
-        jahresentgelt=0.30,
-        darlehenszins=4.25,
-        zins_tilgung=6
-    )
+    tarif_rechner("Spar25", sparzins=0.25, regelsparbeitrag=5, abschlussgebuehr=1.6, jahresentgelt=0.30, zins_tilgung=6, darlehenszins=4.25)
+
 
 
 
