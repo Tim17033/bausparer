@@ -59,14 +59,13 @@ def show_tarif_details(tarif_name, sparzins, regelsparbeitrag, abschlussgebuehr,
 def tarif_rechner(name, sparzins, regelsparbeitrag, abschlussgebuehr, jahresentgelt, zins_tilgung, darlehenszins):
     st.title(f"🏠 LBS Bausparrechner – {name}")
     bausparsumme = st.number_input("💰 Bausparsumme (€):", min_value=10000, max_value=500000, step=1000)
-    vorschlag_sparrate = bausparsumme * regelsparbeitrag / 1000
-
     if bausparsumme:
+        vorschlag_sparrate = max(bausparsumme * regelsparbeitrag / 1000, 50.0)  # Mindestsparrate: 50 €
         monatlicher_sparbeitrag = st.number_input(
             f"📅 Monatliche Sparrate (Vorschlag: {vorschlag_sparrate:.2f} €, Regelsparbeitrag):",
             min_value=50.0,
             max_value=2000.0,
-            value=float(vorschlag_sparrate),
+            value=float(vorschlag_sparrate),  # Konvertiere zu float
             step=10.0,
         )
         st.caption("💡 Der Vorschlag basiert auf dem Regelsparbeitrag des gewählten Tarifs.")
@@ -87,7 +86,7 @@ def tarif_rechner(name, sparzins, regelsparbeitrag, abschlussgebuehr, jahresentg
         zinsen_anspar = df_anspar["Zinsen"].sum()
 
         regelsparzeit_df = calculate_ansparphase(
-            bausparsumme, vorschlag_sparrate, sparzins, abschlussgebuehr, jahresentgelt, einmalzahlung
+            bausparsumme, max(bausparsumme * regelsparbeitrag / 1000, 50.0), sparzins, abschlussgebuehr, jahresentgelt, einmalzahlung
         )
         regelsparzeit_monate = len(regelsparzeit_df)
 
@@ -157,6 +156,7 @@ elif tarif == "Classic20 Plus F":
 elif tarif == "Spar25":
     show_tarif_details("Spar25", 0.25, 5, 1.6, 0.30, 6, 4.25)
     tarif_rechner("Spar25", 0.25, 5, 1.6, 0.30, 6, 4.25)
+
 
 
 
