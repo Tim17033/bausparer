@@ -47,9 +47,14 @@ def calculate_required_rate(bausparsumme, sparzins, abschlussgebuehr, jahresentg
     jahresentgelt_betrag = min((bausparsumme / 1000) * jahresentgelt, 30) * zuteilungszeit  # Jahresentgelt über gesamte Zeit
     zielguthaben = mindestsparguthaben + abschlussgebuehr + jahresentgelt_betrag - einmalzahlung
 
-    # Direkte Lösung für R
+    # Anzahl der Monate
     monate = zuteilungszeit * 12
-    r = zielguthaben / (monate + (monate * (monate + 1) / 2) * (sparzins / 100 / 12))
+
+    # Berechnung der Sparrate
+    r = zielguthaben / (
+        monate
+        + (monate * (monate + 1) / 2) * (sparzins / 100 / 12)
+    )
     return r
 
 # Funktionsdefinition für den Tarifrechner
@@ -166,16 +171,3 @@ elif tarif == "Classic20 Plus F":
     tarif_rechner("Classic20 Plus F", sparzins=0.01, regelsparbeitrag=4, abschlussgebuehr=1.6, jahresentgelt=0.30, zins_tilgung=5, darlehenszins=1.65)
 elif tarif == "Spar25":
     tarif_rechner("Spar25", sparzins=0.25, regelsparbeitrag=5, abschlussgebuehr=1.6, jahresentgelt=0.30, zins_tilgung=6, darlehenszins=4.25)
-
-
-
-
-
-
-
-
-
-
-
-
-
