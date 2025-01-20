@@ -19,13 +19,6 @@ def calculate_ansparphase(bausparsumme, monatlicher_sparbeitrag, sparzins, absch
 
     return monate
 
-# Berechnung der Zuteilungszeit bei Regelsparbeitrag
-def calculate_regelspar_zuteilung(bausparsumme, regelsparbeitrag, sparzins, abschlussgebuehr, jahresentgelt):
-    monatlicher_sparbeitrag = bausparsumme * regelsparbeitrag / 1000
-    monate = calculate_ansparphase(bausparsumme, monatlicher_sparbeitrag, sparzins, abschlussgebuehr, jahresentgelt)
-    zuteilungsdatum = datetime.now() + timedelta(days=monate * 30)
-    return monate, zuteilungsdatum
-
 # Berechnung des Lösungsansatzes (Sparrate für gewünschte Zuteilungszeit)
 def calculate_sparrate_for_target_time(bausparsumme, zielzeit_in_jahren, sparzins, abschlussgebuehr, jahresentgelt, einmalzahlung=0):
     zielzeit_in_monaten = int(zielzeit_in_jahren * 12)
@@ -65,9 +58,9 @@ def calculate_darlehensphase(bausparsumme, darlehenszins, zins_tilgung):
 
 # Tarifdetails anzeigen
 def show_tarif_details(tarif_name, sparzins, regelsparbeitrag, abschlussgebuehr, jahresentgelt, zins_tilgung, darlehenszins, bausparsumme):
-    monate_regelspar, zuteilungsdatum = calculate_regelspar_zuteilung(
-        bausparsumme, regelsparbeitrag, sparzins, abschlussgebuehr, jahresentgelt
-    )
+    vorschlag_sparrate = bausparsumme * regelsparbeitrag / 1000
+    monate_regelspar = calculate_ansparphase(bausparsumme, vorschlag_sparrate, sparzins, abschlussgebuehr, jahresentgelt)
+    zuteilungsdatum = datetime.now() + timedelta(days=(monate_regelspar * 30))
 
     st.markdown(f"### Tarifkonditionen – {tarif_name}")
     st.markdown(
@@ -123,4 +116,5 @@ def tarif_rechner(name, sparzins, regelsparbeitrag, abschlussgebuehr, jahresentg
                 f"Die tatsächliche Ansparzeit beträgt **{monate_anspar / 12:.1f} Jahre**. "
                 f"💡 Um die Zuteilungszeit zu erreichen, müsste Ihre monatliche Sparrate auf etwa **{erforderliche_sparrate:.2f} €** erhöht werden."
             )
+
 
