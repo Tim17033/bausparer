@@ -110,6 +110,15 @@ def tarif_rechner(name, sparzins, regelsparbeitrag, abschlussgebuehr, jahresentg
         monate_anspar = len(df_anspar)
         zinsen_anspar = df_anspar["Zinsen"].sum()
 
+        # Prüfen, ob die gewünschte Zuteilungszeit erreicht wird
+        if monate_anspar / 12 > zuteilungszeit:
+            erforderliche_sparrate = monatlicher_sparbeitrag + 10
+            st.warning(
+                f"⚠️ Die gewünschte Zuteilungszeit von **{zuteilungszeit:.1f} Jahren** kann nicht eingehalten werden. "
+                f"Die tatsächliche Ansparzeit beträgt **{monate_anspar / 12:.1f} Jahre**. "
+                f"💡 Um die Zuteilungszeit zu erreichen, müsste Ihre monatliche Sparrate auf etwa **{erforderliche_sparrate:.2f} €** erhöht werden."
+            )
+
         # Darlehensphase berechnen
         df_darlehen = calculate_darlehensphase_with_pandas(
             bausparsumme, darlehenszins, zins_tilgung
@@ -164,3 +173,4 @@ elif tarif == "Classic20 Plus F":
     tarif_rechner("Classic20 Plus F", 0.01, 4, 1.6, 0.30, 5, 1.65)
 elif tarif == "Spar25":
     tarif_rechner("Spar25", 0.25, 5, 1.6, 0.30, 6, 4.25)
+
