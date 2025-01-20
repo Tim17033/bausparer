@@ -43,10 +43,10 @@ def calculate_darlehensphase_with_pandas(bausparsumme, darlehenszins, zins_tilgu
     return df
 
 # Tarifdetails anzeigen
-def show_tarif_details(tarif_name, sparzins, regelsparbeitrag, abschlussgebuehr, jahresentgelt, zins_tilgung, darlehenszins, bausparsumme, einmalzahlung):
+def show_tarif_details(tarif_name, sparzins, regelsparbeitrag, abschlussgebuehr, jahresentgelt, zins_tilgung, darlehenszins, bausparsumme):
     vorschlag_sparrate = bausparsumme * regelsparbeitrag / 1000
     df_anspar = calculate_ansparphase_with_pandas(
-        bausparsumme, vorschlag_sparrate, sparzins, abschlussgebuehr, jahresentgelt, einmalzahlung
+        bausparsumme, vorschlag_sparrate, sparzins, abschlussgebuehr, jahresentgelt, 0
     )
     monate_regelspar = len(df_anspar)
     zuteilungsdatum = datetime.now() + timedelta(days=(monate_regelspar * 30))
@@ -70,12 +70,16 @@ def show_tarif_details(tarif_name, sparzins, regelsparbeitrag, abschlussgebuehr,
 # Hauptrechner
 def tarif_rechner(name, sparzins, regelsparbeitrag, abschlussgebuehr, jahresentgelt, zins_tilgung, darlehenszins):
     st.markdown(f"## Tarifkonditionen – {name}")
+    
+    # Tarifdetails über den Eingabefeldern anzeigen
     bausparsumme = st.number_input("💰 Bausparsumme (€):", min_value=10000, max_value=500000, step=1000)
     einmalzahlung = st.number_input("💵 Einmalzahlung (€):", min_value=0.0, step=100.0)
 
-    show_tarif_details(
-        name, sparzins, regelsparbeitrag, abschlussgebuehr, jahresentgelt, zins_tilgung, darlehenszins, bausparsumme, einmalzahlung
-    )
+    # Tarifdetails ganz oben anzeigen
+    if bausparsumme > 0:
+        show_tarif_details(
+            name, sparzins, regelsparbeitrag, abschlussgebuehr, jahresentgelt, zins_tilgung, darlehenszins, bausparsumme
+        )
 
     if bausparsumme:
         vorschlag_sparrate = max(bausparsumme * regelsparbeitrag / 1000, 50)
@@ -83,7 +87,7 @@ def tarif_rechner(name, sparzins, regelsparbeitrag, abschlussgebuehr, jahresentg
             f"📅 Monatliche Sparrate (Vorschlag: {vorschlag_sparrate:.2f} €, Regelsparbeitrag):",
             min_value=50.0,
             max_value=2000.0,
-            value=float(vorschlag_sparrate),  # Fix: Konvertiere zu float
+            value=float(vorschlag_sparrate),
             step=10.0,
         )
         st.caption("💡 Der Vorschlag basiert auf dem Regelsparbeitrag des gewählten Tarifs.")
@@ -129,6 +133,7 @@ elif tarif == "Classic20 Plus F":
     tarif_rechner("Classic20 Plus F", 0.01, 4, 1.6, 0.30, 5, 1.65)
 elif tarif == "Spar25":
     tarif_rechner("Spar25", 0.25, 5, 1.6, 0.30, 6, 4.25)
+
 
 
 
