@@ -25,9 +25,37 @@ def calculate_ansparphase(bausparsumme, monatlicher_sparbeitrag, sparzins, absch
 
     return monate, restbetrag, zinsen_gesamt, guthaben_verlauf
 
+# Anzeige der Tarif-Eckdaten
+def show_tarif_details(tarif_name, sparzins, regelsparbeitrag, abschlussgebuehr, jahresentgelt, zins_tilgung, darlehenszins):
+    st.markdown(f"### Tarifkonditionen – {tarif_name}")
+    st.markdown(
+        f"""
+        **Ansparphase:**
+        - Sparzins: **{sparzins:.2f}%**
+        - Monatlicher Regelsparbeitrag: **{regelsparbeitrag}‰** der Bausparsumme
+        - Abschlussgebühr: **{abschlussgebuehr:.2f}%** der Bausparsumme
+        - Jahresentgelt: **{jahresentgelt:.2f} €** pro 1.000 € Bausparsumme (max. 30 € pro Jahr)
+
+        **Darlehensphase:**
+        - Fester Sollzins: **{darlehenszins:.2f}%**
+        - Monatliche Zins- und Tilgungsrate: **{zins_tilgung}‰** der Bausparsumme
+        """
+    )
+
 # Funktionsdefinition für den Tarifrechner
 def tarif_rechner(name, sparzins, regelsparbeitrag, abschlussgebuehr, jahresentgelt, zins_tilgung, darlehenszins):
     st.title(f"🏠 LBS Bausparrechner – {name}")
+    
+    # Tarifdetails anzeigen
+    show_tarif_details(
+        name,
+        sparzins,
+        regelsparbeitrag,
+        abschlussgebuehr,
+        jahresentgelt,
+        zins_tilgung,
+        darlehenszins,
+    )
 
     # Eingaben des Kunden
     bausparsumme = st.number_input("💰 Bausparsumme (€):", min_value=10000, max_value=500000, step=1000)
@@ -133,6 +161,7 @@ elif tarif == "Classic20 Plus F":
     tarif_rechner("Classic20 Plus F", sparzins=0.01, regelsparbeitrag=4, abschlussgebuehr=1.6, jahresentgelt=0.30, zins_tilgung=5, darlehenszins=1.65)
 elif tarif == "Spar25":
     tarif_rechner("Spar25", sparzins=0.25, regelsparbeitrag=5, abschlussgebuehr=1.6, jahresentgelt=0.30, zins_tilgung=6, darlehenszins=4.25)
+
 
 
 
