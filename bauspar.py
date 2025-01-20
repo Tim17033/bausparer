@@ -171,3 +171,4 @@ def tarif_rechner(name, sparzins, regelsparbeitrag, abschlussgebuehr, jahresentg
 # Hauptmenü und Tarifauswahl (bleibt unverändert)
 # Siehe vorheriger Code
 
+
