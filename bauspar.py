@@ -1,6 +1,5 @@
 import streamlit as st
 import matplotlib.pyplot as plt
-import numpy as np
 import pandas as pd
 from datetime import datetime, timedelta
 import time
@@ -60,8 +59,9 @@ def show_tarif_details(tarif_name, sparzins, regelsparbeitrag, abschlussgebuehr,
 def tarif_rechner(name, sparzins, regelsparbeitrag, abschlussgebuehr, jahresentgelt, zins_tilgung, darlehenszins):
     st.title(f"🏠 LBS Bausparrechner – {name}")
     bausparsumme = st.number_input("💰 Bausparsumme (€):", min_value=10000, max_value=500000, step=1000)
+    vorschlag_sparrate = bausparsumme * regelsparbeitrag / 1000
+
     if bausparsumme:
-        vorschlag_sparrate = max(bausparsumme * regelsparbeitrag / 1000, 50)
         monatlicher_sparbeitrag = st.number_input(
             f"📅 Monatliche Sparrate (Vorschlag: {vorschlag_sparrate:.2f} €, Regelsparbeitrag):",
             min_value=50.0,
@@ -87,11 +87,10 @@ def tarif_rechner(name, sparzins, regelsparbeitrag, abschlussgebuehr, jahresentg
         zinsen_anspar = df_anspar["Zinsen"].sum()
 
         regelsparzeit_df = calculate_ansparphase(
-            bausparsumme, bausparsumme * regelsparbeitrag / 1000, sparzins, abschlussgebuehr, jahresentgelt, einmalzahlung
+            bausparsumme, vorschlag_sparrate, sparzins, abschlussgebuehr, jahresentgelt, einmalzahlung
         )
         regelsparzeit_monate = len(regelsparzeit_df)
 
-        # Prüfen, ob gewünschte Zuteilungszeit erreicht wird
         if monate_anspar / 12 > zuteilungszeit:
             erforderliche_sparrate = monatlicher_sparbeitrag + 10
             st.warning(
@@ -100,7 +99,6 @@ def tarif_rechner(name, sparzins, regelsparbeitrag, abschlussgebuehr, jahresentg
                 f"💡 Um die Zuteilungszeit zu erreichen, müsste Ihre monatliche Sparrate auf etwa **{erforderliche_sparrate:.2f} €** erhöht werden."
             )
 
-        # Darlehensphase berechnen
         df_darlehen = calculate_darlehensphase(
             bausparsumme, darlehenszins, zins_tilgung
         )
@@ -141,7 +139,6 @@ tarif = st.radio(
     ["Classic20 F3", "Sprint22", "Komfort22", "Classic20 F8", "Classic20 Plus F", "Spar25"]
 )
 
-# Tarifdetails und Berechnungen
 if tarif == "Classic20 F3":
     show_tarif_details("Classic20 F3", 0.05, 3, 1.6, 0.30, 3.5, 2.25)
     tarif_rechner("Classic20 F3", 0.05, 3, 1.6, 0.30, 3.5, 2.25)
@@ -160,6 +157,7 @@ elif tarif == "Classic20 Plus F":
 elif tarif == "Spar25":
     show_tarif_details("Spar25", 0.25, 5, 1.6, 0.30, 6, 4.25)
     tarif_rechner("Spar25", 0.25, 5, 1.6, 0.30, 6, 4.25)
+
 
 
 
