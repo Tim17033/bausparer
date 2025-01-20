@@ -16,7 +16,6 @@ def calculate_ansparphase_with_pandas(bausparsumme, monatlicher_sparbeitrag, spa
         jahresentgelt_betrag = min((bausparsumme / 1000) * jahresentgelt, 30) / 12
         sparbetrag = monatlicher_sparbeitrag - jahresentgelt_betrag
         restbetrag += sparbetrag + zinsen
-
         data.append({"Monat": monate, "Guthaben": restbetrag, "Zinsen": zinsen, "Sparbetrag": sparbetrag})
         monate += 1
 
@@ -34,37 +33,31 @@ def calculate_darlehensphase_with_pandas(bausparsumme, darlehenszins, zins_tilgu
         zinsen = darlehensbetrag * (darlehenszins / 100 / 12)
         tilgung = monatliche_rate - zinsen
         darlehensbetrag -= tilgung
-
         data.append({"Monat": laufzeit_monate, "Restschuld": max(0, darlehensbetrag), "Zinsen": zinsen, "Tilgung": tilgung})
         laufzeit_monate += 1
 
     df = pd.DataFrame(data)
     return df
 
-# Berechnung der angepassten Sparrate
+# Berechnung der erforderlichen Sparrate
 def calculate_adjusted_sparrate(bausparsumme, abschlussgebuehr, sparzins, jahresentgelt, zuteilungszeit, einmalzahlung):
-    restbetrag = -abschlussgebuehr + einmalzahlung
     mindestsparguthaben = bausparsumme * 0.4
+    restbetrag = -abschlussgebuehr + einmalzahlung
+    jahresentgelt_betrag = min((bausparsumme / 1000) * jahresentgelt, 30)
     monate = int(zuteilungszeit * 12)
-    sparrate = 0
+    monatlicher_sparbeitrag = (mindestsparguthaben - restbetrag) / monate + (jahresentgelt_betrag / 12)
+    return monatlicher_sparbeitrag
 
-    for _ in range(monate):
-        zinsen = max(0, restbetrag) * (sparzins / 100 / 12)
-        jahresentgelt_betrag = min((bausparsumme / 1000) * jahresentgelt, 30) / 12
-        sparrate = (mindestsparguthaben - restbetrag) / monate + jahresentgelt_betrag - zinsen
-        restbetrag += sparrate + zinsen
-
-    return max(sparrate, 0)
-
-# Tarifdetails anzeigen
-def show_tarif_details(tarif_name, sparzins, regelsparbeitrag, abschlussgebuehr, jahresentgelt, zuteilungszeit, bausparsumme):
+# Anzeige der Tarifkonditionen
+def display_tarif_konditionen(name, sparzins, regelsparbeitrag, abschlussgebuehr, jahresentgelt, bausparsumme):
+    vorschlag_sparrate = bausparsumme * regelsparbeitrag / 1000
     df_regelspar = calculate_ansparphase_with_pandas(
-        bausparsumme, bausparsumme * regelsparbeitrag / 1000, sparzins, abschlussgebuehr, jahresentgelt, 0
+        bausparsumme, vorschlag_sparrate, sparzins, abschlussgebuehr, jahresentgelt, 0
     )
     monate_regelspar = len(df_regelspar)
     zuteilungsdatum = datetime.now() + timedelta(days=(monate_regelspar * 30))
 
-    st.markdown(f"### Tarifkonditionen – {tarif_name}")
+    st.markdown(f"### Tarifkonditionen – {name}")
     st.markdown(
         f"""
         **Ansparphase:**
@@ -72,7 +65,7 @@ def show_tarif_details(tarif_name, sparzins, regelsparbeitrag, abschlussgebuehr,
         - Monatlicher Regelsparbeitrag: **{regelsparbeitrag}‰** der Bausparsumme
         - Abschlussgebühr: **{abschlussgebuehr:.2f}%** der Bausparsumme
         - Jahresentgelt: **{jahresentgelt:.2f} €** pro 1.000 € Bausparsumme (max. 30 € pro Jahr)
-        - Mindestsparguthaben: **{bausparsumme * 0.4:,.2f} €**
+        - Mindestansparsumme: **{bausparsumme * 0.4:,.2f} €**
         - Zuteilungszeit bei Regelsparbeitrag: **{monate_regelspar // 12} Jahre und {monate_regelspar % 12} Monate** (ca. **{zuteilungsdatum.strftime('%d.%m.%Y')}**)
         """
     )
@@ -83,6 +76,7 @@ def tarif_rechner(name, sparzins, regelsparbeitrag, abschlussgebuehr, jahresentg
     
     bausparsumme = st.number_input("💰 Bausparsumme (€):", min_value=10000, max_value=500000, step=1000)
     if bausparsumme:
+        display_tarif_konditionen(name, sparzins, regelsparbeitrag, abschlussgebuehr, jahresentgelt, bausparsumme)
         vorschlag_sparrate = bausparsumme * regelsparbeitrag / 1000
         monatlicher_sparbeitrag = st.number_input(
             f"📅 Monatliche Sparrate (Vorschlag: {vorschlag_sparrate:.2f} €, Regelsparbeitrag):",
@@ -100,10 +94,10 @@ def tarif_rechner(name, sparzins, regelsparbeitrag, abschlussgebuehr, jahresentg
         with st.spinner("🔄 Berechnung wird durchgeführt..."):
             time.sleep(2)
 
-        # Ansparphase berechnen
         df_anspar = calculate_ansparphase_with_pandas(
             bausparsumme, monatlicher_sparbeitrag, sparzins, abschlussgebuehr, jahresentgelt, einmalzahlung
         )
+
         monate_anspar = len(df_anspar)
         zinsen_anspar = df_anspar["Zinsen"].sum()
 
@@ -159,20 +153,15 @@ tarif = st.radio(
 
 # Tarifdetails und Berechnungen
 if tarif == "Classic20 F3":
-    show_tarif_details("Classic20 F3", 0.05, 3, 1.6, 0.30, 11, 10000)
     tarif_rechner("Classic20 F3", 0.05, 3, 1.6, 0.30, 3.5, 2.25)
 elif tarif == "Sprint22":
-    show_tarif_details("Sprint22", 0.05, 7, 1.6, 0.30, 6, 10000)
     tarif_rechner("Sprint22", 0.05, 7, 1.6, 0.30, 6, 1.75)
 elif tarif == "Komfort22":
-    show_tarif_details("Komfort22", 0.05, 3, 1.6, 0.30, 7, 10000)
     tarif_rechner("Komfort22", 0.05, 3, 1.6, 0.30, 7, 2.35)
 elif tarif == "Classic20 F8":
-    show_tarif_details("Classic20 F8", 0.05, 3, 1.6, 0.30, 8, 10000)
     tarif_rechner("Classic20 F8", 0.05, 3, 1.6, 0.30, 8, 0.95)
 elif tarif == "Classic20 Plus F":
-    show_tarif_details("Classic20 Plus F", 0.01, 4, 1.6, 0.30, 8, 10000)
     tarif_rechner("Classic20 Plus F", 0.01, 4, 1.6, 0.30, 5, 1.65)
 elif tarif == "Spar25":
-    show_tarif_details("Spar25", 0.25, 5, 1.6, 0.30, 6, 10000)
     tarif_rechner("Spar25", 0.25, 5, 1.6, 0.30, 6, 4.25)
+
