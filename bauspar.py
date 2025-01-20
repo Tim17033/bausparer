@@ -90,7 +90,7 @@ def tarif_rechner(name, sparzins, regelsparbeitrag, abschlussgebuehr, jahresentg
             f"📅 Monatliche Sparrate (Vorschlag: {vorschlag_sparrate:.2f} €, Regelsparbeitrag):",
             min_value=50.0,
             max_value=2000.0,
-            value=vorschlag_sparrate,
+            value=float(vorschlag_sparrate),  # Fix: Konvertiere zu float
             step=10.0,
         )
         st.caption("💡 Der Vorschlag basiert auf dem Regelsparbeitrag des gewählten Tarifs.")
@@ -164,9 +164,3 @@ elif tarif == "Classic20 Plus F":
     tarif_rechner("Classic20 Plus F", 0.01, 4, 1.6, 0.30, 5, 1.65)
 elif tarif == "Spar25":
     tarif_rechner("Spar25", 0.25, 5, 1.6, 0.30, 6, 4.25)
-
-
-
-
-
-
