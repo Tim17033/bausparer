@@ -1,113 +1,171 @@
 import streamlit as st
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
 from datetime import datetime, timedelta
+import time
 
-def display_tarif_konditionen(name, sparzins, regelsparbeitrag, abschlussgebuehr, jahresentgelt, regelsparzeit, sollzins):
-    regelsparzeit_jahre = int(regelsparzeit)
-    regelsparzeit_monate = int((regelsparzeit - regelsparzeit_jahre) * 12)
-    regelsparzeit_datum = datetime.now() + timedelta(days=(regelsparzeit_jahre * 365 + regelsparzeit_monate * 30))
-    regelsparzeit_datum_formatiert = regelsparzeit_datum.strftime("%d.%m.%Y")
+# Berechnung der Ansparphase
+def calculate_ansparphase_with_pandas(bausparsumme, monatlicher_sparbeitrag, sparzins, abschlussgebuehr, jahresentgelt, einmalzahlung):
+    restbetrag = -abschlussgebuehr + einmalzahlung
+    mindestsparguthaben = bausparsumme * 0.4
+    monate = 0
+    data = []
 
-    st.markdown(f"## Tarifkonditionen – {name}")
-    st.markdown("### Ansparphase:")
-    st.write(f"- **Sparzins**: {sparzins:.3%}")
-    st.write(f"- **Monatlicher Regelsparbeitrag**: {regelsparbeitrag}‰ der Bausparsumme")
-    st.write(f"- **Abschlussgebühr**: {abschlussgebuehr:.2%} der Bausparsumme")
-    st.write(f"- **Jahresentgelt**: {jahresentgelt:.2f} € pro 1.000 € Bausparsumme (max. 30 € pro Jahr)")
-    st.write(f"- **Zuteilungszeit bei Regelsparbeitrag**: {regelsparzeit_jahre} Jahre und {regelsparzeit_monate} Monate (ca. {regelsparzeit_datum_formatiert})")
+    while restbetrag < mindestsparguthaben:
+        zinsen = max(0, restbetrag) * (sparzins / 100 / 12)
+        jahresentgelt_betrag = min((bausparsumme / 1000) * jahresentgelt, 30) / 12
+        sparbetrag = monatlicher_sparbeitrag - jahresentgelt_betrag
+        restbetrag += sparbetrag + zinsen
 
-    st.markdown("### Darlehensphase:")
-    st.write(f"- **Fester Sollzins**: {sollzins:.2%}")
-    st.write(f"- **Monatliche Zins- und Tilgungsrate**: {regelsparbeitrag:.1f}‰ der Bausparsumme")
+        data.append({"Monat": monate, "Guthaben": restbetrag, "Zinsen": zinsen, "Sparbetrag": sparbetrag})
+        monate += 1
 
+    df = pd.DataFrame(data)
+    return df
 
-# Hauptcode
-st.title("LBS Bausparrechner")
+# Berechnung der Darlehensphase
+def calculate_darlehensphase_with_pandas(bausparsumme, darlehenszins, zins_tilgung):
+    darlehensbetrag = bausparsumme * 0.6
+    monatliche_rate = bausparsumme * zins_tilgung / 1000
+    laufzeit_monate = 0
+    data = []
 
-# Tarifauswahl
-st.markdown("### Wähle einen Tarif:")
-tarif = st.radio("Verfügbare Tarife:", ["Classic20 F3", "Sprint22", "Komfort22", "Classic20 F8", "Classic20 Plus F", "Spar25"])
+    while darlehensbetrag > 0:
+        zinsen = darlehensbetrag * (darlehenszins / 100 / 12)
+        tilgung = monatliche_rate - zinsen
+        darlehensbetrag -= tilgung
 
-# Tarifdaten
-if tarif == "Classic20 F3":
-    tarif_name = "Classic20 F3"
-    sparzins = 0.0005  # 0.05% Zins
-    regelsparbeitrag = 3
-    abschlussgebuehr = 1.6
-    jahresentgelt = 0.30
-    regelsparzeit = 11.25  # 11 Jahre und 3 Monate
-    sollzins = 2.25
-elif tarif == "Sprint22":
-    tarif_name = "Sprint22"
-    sparzins = 0.0005  # 0.05% Zins
-    regelsparbeitrag = 7
-    abschlussgebuehr = 1.6
-    jahresentgelt = 0.30
-    regelsparzeit = 6.00  # 6 Jahre
-    sollzins = 1.75
-elif tarif == "Komfort22":
-    tarif_name = "Komfort22"
-    sparzins = 0.0005  # 0.05% Zins
-    regelsparbeitrag = 3
-    abschlussgebuehr = 1.6
-    jahresentgelt = 0.30
-    regelsparzeit = 8.5  # 8 Jahre und 6 Monate
-    sollzins = 2.35
-elif tarif == "Classic20 F8":
-    tarif_name = "Classic20 F8"
-    sparzins = 0.0005  # 0.05% Zins
-    regelsparbeitrag = 3
-    abschlussgebuehr = 1.6
-    jahresentgelt = 0.30
-    regelsparzeit = 11.25  # 11 Jahre und 3 Monate
-    sollzins = 0.95
-elif tarif == "Classic20 Plus F":
-    tarif_name = "Classic20 Plus F"
-    sparzins = 0.0001  # 0.01% Zins
-    regelsparbeitrag = 4
-    abschlussgebuehr = 1.6
-    jahresentgelt = 0.30
-    regelsparzeit = 8.5  # 8 Jahre und 6 Monate
-    sollzins = 1.65
-elif tarif == "Spar25":
-    tarif_name = "Spar25"
-    sparzins = 0.0025  # 0.25% Zins
-    regelsparbeitrag = 5
-    abschlussgebuehr = 1.6
-    jahresentgelt = 0.30
-    regelsparzeit = 10.33  # 10 Jahre und 4 Monate
-    sollzins = 4.25
+        data.append({"Monat": laufzeit_monate, "Restschuld": max(0, darlehensbetrag), "Zinsen": zinsen, "Tilgung": tilgung})
+        laufzeit_monate += 1
 
-# Tarifkonditionen anzeigen
-display_tarif_konditionen(tarif_name, sparzins, regelsparbeitrag, abschlussgebuehr, jahresentgelt, regelsparzeit, sollzins)
+    df = pd.DataFrame(data)
+    return df
 
-# Eingabefelder
-st.markdown("### Geben Sie Ihre Daten ein:")
-bausparsumme = st.number_input("💰 Bausparsumme (€):", min_value=10000, step=1000)
-einmalzahlung = st.number_input("💵 Einmalzahlung (€):", min_value=0, step=500)
-monatl_sparrate = st.number_input(f"📅 Monatliche Sparrate (Vorschlag: {regelsparbeitrag / 10 * bausparsumme:.2f} €, Regelsparbeitrag):", min_value=0.0, step=10.0)
-gew_zuteilung = st.number_input("⏳ Gewünschte Zeit bis zur Zuteilung (in Jahren):", min_value=1.0, step=0.5)
+# Tarifdetails anzeigen
+def show_tarif_details(tarif_name, sparzins, regelsparbeitrag, abschlussgebuehr, jahresentgelt, zins_tilgung, darlehenszins, bausparsumme, einmalzahlung):
+    vorschlag_sparrate = bausparsumme * regelsparbeitrag / 1000
+    df_anspar = calculate_ansparphase_with_pandas(
+        bausparsumme, vorschlag_sparrate, sparzins, abschlussgebuehr, jahresentgelt, einmalzahlung
+    )
+    monate_regelspar = len(df_anspar)
+    zuteilungsdatum = datetime.now() + timedelta(days=(monate_regelspar * 30))
 
-# Berechnung starten
-if st.button("Berechnung starten"):
-    with st.spinner("Berechnung wird durchgeführt..."):
-        regelsparzeit_jahre = int(regelsparzeit)
-        regelsparzeit_monate = int((regelsparzeit - regelsparzeit_jahre) * 12)
-        regelsparzeit_datum = datetime.now() + timedelta(days=(regelsparzeit_jahre * 365 + regelsparzeit_monate * 30))
-        regelsparzeit_datum_formatiert = regelsparzeit_datum.strftime("%d.%m.%Y")
+    st.markdown(f"### Tarifkonditionen – {tarif_name}")
+    st.markdown(
+        f"""
+        **Ansparphase:**
+        - Sparzins: **{sparzins:.2f}%**
+        - Monatlicher Regelsparbeitrag: **{regelsparbeitrag}‰** der Bausparsumme
+        - Abschlussgebühr: **{abschlussgebuehr:.2f}%** der Bausparsumme
+        - Jahresentgelt: **{jahresentgelt:.2f} €** pro 1.000 € Bausparsumme (max. 30 € pro Jahr)
+        - Zuteilungszeit bei Regelsparbeitrag: **{monate_regelspar // 12} Jahre und {monate_regelspar % 12} Monate** (ca. **{zuteilungsdatum.strftime('%d.%m.%Y')}**)
 
-        # Logik für Zuteilung und Lösungsvorschlag
-        if gew_zuteilung < regelsparzeit:
+        **Darlehensphase:**
+        - Fester Sollzins: **{darlehenszins:.2f}%**
+        - Monatliche Zins- und Tilgungsrate: **{zins_tilgung}‰** der Bausparsumme
+        """
+    )
+
+# Hauptrechner
+def tarif_rechner(name, sparzins, regelsparbeitrag, abschlussgebuehr, jahresentgelt, zins_tilgung, darlehenszins):
+    # Tarifdetails zuerst anzeigen (ganz oben über allen Eingabefeldern)
+    st.markdown("### Tarifkonditionen")
+    bausparsumme = st.number_input("💰 Bausparsumme (€):", min_value=10000, max_value=500000, step=1000)
+    einmalzahlung = st.number_input("💵 Einmalzahlung (€):", min_value=0.0, step=100.0)
+    show_tarif_details(
+        name, sparzins, regelsparbeitrag, abschlussgebuehr, jahresentgelt, zins_tilgung, darlehenszins, bausparsumme, einmalzahlung
+    )
+
+    if bausparsumme:
+        vorschlag_sparrate = max(bausparsumme * regelsparbeitrag / 1000, 50)
+        monatlicher_sparbeitrag = st.number_input(
+            f"📅 Monatliche Sparrate (Vorschlag: {vorschlag_sparrate:.2f} €, Regelsparbeitrag):",
+            min_value=50.0,
+            max_value=2000.0,
+            value=float(vorschlag_sparrate),  # Fix: Konvertiere zu float
+            step=10.0,
+        )
+        st.caption("💡 Der Vorschlag basiert auf dem Regelsparbeitrag des gewählten Tarifs.")
+
+    zuteilungszeit = st.number_input("⏳ Gewünschte Zeit bis zur Zuteilung (in Jahren):", min_value=1.5, max_value=20.0, step=0.5)
+
+    if st.button("📊 Berechnung starten"):
+        with st.spinner("🔄 Berechnung wird durchgeführt..."):
+            time.sleep(2)
+
+        # Ansparphase berechnen
+        df_anspar = calculate_ansparphase_with_pandas(
+            bausparsumme, monatlicher_sparbeitrag, sparzins, abschlussgebuehr, jahresentgelt, einmalzahlung
+        )
+
+        monate_anspar = len(df_anspar)
+        zinsen_anspar = df_anspar["Zinsen"].sum()
+
+        # Prüfen, ob gewünschte Zuteilungszeit erreicht wird
+        if monate_anspar / 12 > zuteilungszeit:
+            erforderliche_sparrate = monatlicher_sparbeitrag + 10  # Vorschlag
             st.warning(
-                f"Die gewünschte Zuteilungszeit von **{gew_zuteilung} Jahren** kann nicht eingehalten werden. "
-                f"Die tatsächliche Ansparzeit beträgt **{regelsparzeit_jahre} Jahre und {regelsparzeit_monate} Monate** "
-                f"(ca. {regelsparzeit_datum_formatiert}). "
-                f"💡 Um die Zuteilungszeit zu erreichen, müsste Ihre monatliche Sparrate erhöht werden."
+                f"⚠️ Die gewünschte Zuteilungszeit von **{zuteilungszeit:.1f} Jahren** kann nicht eingehalten werden. "
+                f"Die tatsächliche Ansparzeit beträgt **{monate_anspar / 12:.1f} Jahre**. "
+                f"💡 Um die Zuteilungszeit zu erreichen, müsste Ihre monatliche Sparrate auf etwa **{erforderliche_sparrate:.2f} €** erhöht werden."
             )
-        else:
-            st.success(
-                f"Die Zuteilungszeit von **{gew_zuteilung} Jahren** kann eingehalten werden! "
-                f"Ihre aktuelle Sparrate ist ausreichend. 🎉"
-            )
+
+        # Darlehensphase berechnen
+        df_darlehen = calculate_darlehensphase_with_pandas(
+            bausparsumme, darlehenszins, zins_tilgung
+        )
+        laufzeit_darlehen = len(df_darlehen)
+        zins_darlehen = df_darlehen["Zinsen"].sum()
+
+        st.markdown("## 📋 Ergebnisse")
+        st.markdown(
+            f"""
+            ### 🏦 Ansparphase
+            - Dauer bis zur Zuteilung: **{monate_anspar // 12} Jahre und {monate_anspar % 12} Monate**
+            - Gesamtes Sparguthaben inkl. Einmalzahlung: **{df_anspar['Guthaben'].iloc[-1]:,.2f} €**
+            - Insgesamt erhaltene Zinsen: **{zinsen_anspar:,.2f} €**
+
+            ### 💳 Darlehensphase
+            - Monatliche Rate (Zins + Tilgung): **{df_darlehen['Tilgung'].iloc[0] + df_darlehen['Zinsen'].iloc[0]:,.2f} €**
+            - Gesamte Zinskosten während der Darlehensphase: **{zins_darlehen:,.2f} €**
+            - Laufzeit des Darlehens: **{laufzeit_darlehen // 12} Jahre und {laufzeit_darlehen % 12} Monate**
+            """
+        )
+
+        st.markdown("### 📊 Ansparverlauf")
+        plt.figure(figsize=(10, 5))
+        plt.plot(df_anspar["Monat"], df_anspar["Guthaben"], label="Guthaben inkl. Zinsen", color="green")
+        plt.axhline(y=bausparsumme * 0.4, color="blue", linestyle="--", label="Mindestsparguthaben (40%)")
+        plt.xlabel("Monate")
+        plt.ylabel("Guthaben (€)")
+        plt.title("Ansparverlauf")
+        plt.legend()
+        st.pyplot(plt)
+
+# Hauptmenü und Tarifauswahl
+st.title("🏠 LBS Bausparrechner")
+st.markdown("Wählen Sie einen Tarif aus, um die Berechnungen zu starten.")
+
+tarif = st.radio(
+    "Tarif auswählen:",
+    ["Classic20 F3", "Sprint22", "Komfort22", "Classic20 F8", "Classic20 Plus F", "Spar25"]
+)
+
+# Tarifdetails und Berechnungen
+if tarif == "Classic20 F3":
+    tarif_rechner("Classic20 F3", 0.05, 3, 1.6, 0.30, 3.5, 2.25)
+elif tarif == "Sprint22":
+    tarif_rechner("Sprint22", 0.05, 7, 1.6, 0.30, 6, 1.75)
+elif tarif == "Komfort22":
+    tarif_rechner("Komfort22", 0.05, 3, 1.6, 0.30, 7, 2.35)
+elif tarif == "Classic20 F8":
+    tarif_rechner("Classic20 F8", 0.05, 3, 1.6, 0.30, 8, 0.95)
+elif tarif == "Classic20 Plus F":
+    tarif_rechner("Classic20 Plus F", 0.01, 4, 1.6, 0.30, 5, 1.65)
+elif tarif == "Spar25":
+    tarif_rechner("Spar25", 0.25, 5, 1.6, 0.30, 6, 4.25)
+
 
 
 
