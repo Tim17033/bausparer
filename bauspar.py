@@ -49,13 +49,21 @@ def calculate_adjusted_sparrate(bausparsumme, abschlussgebuehr, sparzins, jahres
     return monatlicher_sparbeitrag
 
 # Anzeige der Tarifkonditionen
-def display_tarif_konditionen(name, sparzins, regelsparbeitrag, abschlussgebuehr, jahresentgelt, bausparsumme):
+def display_tarif_konditionen(name, sparzins, regelsparbeitrag, abschlussgebuehr, jahresentgelt, zins_tilgung, darlehenszins, bausparsumme):
     vorschlag_sparrate = bausparsumme * regelsparbeitrag / 1000
     df_regelspar = calculate_ansparphase_with_pandas(
         bausparsumme, vorschlag_sparrate, sparzins, abschlussgebuehr, jahresentgelt, 0
     )
     monate_regelspar = len(df_regelspar)
     zuteilungsdatum = datetime.now() + timedelta(days=(monate_regelspar * 30))
+
+    angespartes_guthaben = bausparsumme * 0.4
+    darlehensphase_df = calculate_darlehensphase_with_pandas(
+        bausparsumme, angespartes_guthaben, darlehenszins, zins_tilgung
+    )
+    monatliche_darlehensrate = darlehensphase_df["Tilgung"].iloc[0] + darlehensphase_df["Zinsen"].iloc[0]
+    laufzeit_darlehen = len(darlehensphase_df)
+    zinskosten_darlehen = darlehensphase_df["Zinsen"].sum()
 
     st.markdown(f"### Tarifkonditionen – {name}")
     st.markdown(
@@ -67,6 +75,11 @@ def display_tarif_konditionen(name, sparzins, regelsparbeitrag, abschlussgebuehr
         - Jahresentgelt: **{jahresentgelt:.2f} €** pro 1.000 € Bausparsumme (max. 30 € pro Jahr)
         - Mindestansparsumme: **{bausparsumme * 0.4:,.2f} €**
         - Zuteilungszeit bei Regelsparbeitrag: **{monate_regelspar // 12} Jahre und {monate_regelspar % 12} Monate** (ca. **{zuteilungsdatum.strftime('%d.%m.%Y')}**)
+
+        **Darlehensphase:**
+        - Monatliche Rate (Zins + Tilgung): **{monatliche_darlehensrate:,.2f} €**
+        - Gesamte Zinskosten während der Darlehensphase: **{zinskosten_darlehen:,.2f} €**
+        - Laufzeit des Darlehens: **{laufzeit_darlehen // 12} Jahre und {laufzeit_darlehen % 12} Monate**
         """
     )
 
@@ -76,7 +89,7 @@ def tarif_rechner(name, sparzins, regelsparbeitrag, abschlussgebuehr, jahresentg
     
     bausparsumme = st.number_input("💰 Bausparsumme (€):", min_value=10000, max_value=500000, step=1000)
     if bausparsumme:
-        display_tarif_konditionen(name, sparzins, regelsparbeitrag, abschlussgebuehr, jahresentgelt, bausparsumme)
+        display_tarif_konditionen(name, sparzins, regelsparbeitrag, abschlussgebuehr, jahresentgelt, zins_tilgung, darlehenszins, bausparsumme)
         vorschlag_sparrate = bausparsumme * regelsparbeitrag / 1000
         monatlicher_sparbeitrag = st.number_input(
             f"📅 Monatliche Sparrate (Vorschlag: {vorschlag_sparrate:.2f} €, Regelsparbeitrag):",
@@ -165,6 +178,3 @@ elif tarif == "Classic20 Plus F":
     tarif_rechner("Classic20 Plus F", 0.01, 4, 1.6, 0.30, 5, 1.65)
 elif tarif == "Spar25":
     tarif_rechner("Spar25", 0.25, 5, 1.6, 0.30, 6, 4.25)
-
-
-
