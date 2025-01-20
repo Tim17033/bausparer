@@ -73,12 +73,12 @@ def tarif_rechner(name, sparzins, regelsparbeitrag, abschlussgebuehr, jahresentg
     bausparsumme = st.number_input("💰 Bausparsumme (€):", min_value=10000, max_value=500000, step=1000)
     if bausparsumme:
         # Vorschlag für monatliche Sparrate basierend auf Regelsparbeitrag oder mindestens 50 €
-        vorschlag_sparrate = max(bausparsumme * regelsparbeitrag / 1000, 50)  
+        vorschlag_sparrate = float(max(bausparsumme * regelsparbeitrag / 1000, 50))  
         monatlicher_sparbeitrag = st.number_input(
             f"📅 Monatliche Sparrate (Vorschlag: {vorschlag_sparrate:.2f} €, Regelsparbeitrag):",
             min_value=50.0,  # Minimalwert 50 €
             max_value=2000.0,
-            value=vorschlag_sparrate,
+            value=vorschlag_sparrate,  # Hier wird der Vorschlag eingebunden
             step=10.0,
         )
         st.caption("💡 Der Vorschlag basiert auf dem Regelsparbeitrag des gewählten Tarifs.")
@@ -179,6 +179,7 @@ elif tarif == "Classic20 Plus F":
     tarif_rechner("Classic20 Plus F", sparzins=0.01, regelsparbeitrag=4, abschlussgebuehr=1.6, jahresentgelt=0.30, zins_tilgung=5, darlehenszins=1.65)
 elif tarif == "Spar25":
     tarif_rechner("Spar25", sparzins=0.25, regelsparbeitrag=5, abschlussgebuehr=1.6, jahresentgelt=0.30, zins_tilgung=6, darlehenszins=4.25)
+
 
 
 
