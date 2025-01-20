@@ -2,14 +2,22 @@ import streamlit as st
 import time
 
 # Funktionsdefinition für jeden Tarifrechner
-def tarif_rechner(name, sparzins, regelsparbeitrag, mindestsparung, mindestsparzeit, abschlussgebuehr, zins_tilgung):
+def tarif_rechner(name, sparzins, regelsparbeitrag, mindestsparung, mindestsparzeit, abschlussgebuehr, jahresentgelt, darlehenszins, zins_tilgung):
     st.title(f"🏠 LBS Bausparrechner – {name}")
-    st.markdown(f"**Sparzins:** {sparzins}% p.a.")
-    st.markdown(f"**Regelsparbeitrag:** {regelsparbeitrag}‰ der Bausparsumme")
-    st.markdown(f"**Mindestsparung:** {mindestsparung}% der Bausparsumme")
-    st.markdown(f"**Mindestsparzeit:** {mindestsparzeit}")
-    st.markdown(f"**Abschlussgebühr:** {abschlussgebuehr}% der Bausparsumme")
-    st.markdown(f"**Zins- und Tilgungsbeitrag:** {zins_tilgung}‰ der Bausparsumme (monatlich)")
+
+    # Ansparphase
+    st.markdown("### 🏦 Ansparphase")
+    st.markdown(f"- **Sparzins:** {sparzins}% p.a.")
+    st.markdown(f"- **Regelsparbeitrag:** {regelsparbeitrag}‰ der Bausparsumme")
+    st.markdown(f"- **Mindestsparung:** {mindestsparung}% der Bausparsumme")
+    st.markdown(f"- **Mindestsparzeit:** {mindestsparzeit}")
+    st.markdown(f"- **Abschlussgebühr:** {abschlussgebuehr}% der Bausparsumme")
+    st.markdown(f"- **Jahresentgelt:** {jahresentgelt} € pro Jahr")
+
+    # Darlehensphase
+    st.markdown("### 💳 Darlehensphase")
+    st.markdown(f"- **Darlehenszins:** {darlehenszins}% p.a.")
+    st.markdown(f"- **Zins- und Tilgungsbeitrag:** {zins_tilgung}‰ der Bausparsumme (monatlich)")
 
     # Eingaben für den spezifischen Tarif
     bausparsumme = st.number_input("💰 Bausparsumme (€):", min_value=10000, max_value=500000, step=1000)
@@ -24,6 +32,7 @@ def tarif_rechner(name, sparzins, regelsparbeitrag, mindestsparung, mindestsparz
         monatlicher_sparbeitrag = bausparsumme * regelsparbeitrag / 1000
         mindestsparguthaben = bausparsumme * mindestsparung / 100
         abschlussgebuehr_betrag = bausparsumme * abschlussgebuehr / 100
+        jahresentgelt_betrag = (bausparsumme / 1000) * jahresentgelt
 
         # Ergebnisse anzeigen
         st.markdown("## 📋 Ergebnisse")
@@ -33,6 +42,7 @@ def tarif_rechner(name, sparzins, regelsparbeitrag, mindestsparung, mindestsparz
             - Monatlicher Regelsparbeitrag: **{monatlicher_sparbeitrag:,.2f} €**
             - Mindestsparguthaben: **{mindestsparguthaben:,.2f} €**
             - Abschlussgebühr: **{abschlussgebuehr_betrag:,.2f} €**
+            - Jahresentgelt: **{jahresentgelt_betrag:,.2f} € pro Jahr**
             - Gesamtes Sparguthaben inkl. Einmalzahlung: **{mindestsparguthaben + einmalzahlung:,.2f} €**
             """
         )
@@ -63,6 +73,8 @@ if tarif == "Classic20 F3":
         mindestsparung=40,
         mindestsparzeit="1 J. 6 Mo.",
         abschlussgebuehr=1.6,
+        jahresentgelt=0.30,
+        darlehenszins=2.25,
         zins_tilgung=3.5
     )
 elif tarif == "Sprint22":
@@ -73,6 +85,8 @@ elif tarif == "Sprint22":
         mindestsparung=50,
         mindestsparzeit="1 J. 6 Mo.",
         abschlussgebuehr=1.6,
+        jahresentgelt=0.30,
+        darlehenszins=1.75,
         zins_tilgung=6
     )
 elif tarif == "Komfort22":
@@ -83,6 +97,8 @@ elif tarif == "Komfort22":
         mindestsparung=30,
         mindestsparzeit="1 J. 6 Mo.",
         abschlussgebuehr=1.6,
+        jahresentgelt=0.30,
+        darlehenszins=2.35,
         zins_tilgung=7
     )
 elif tarif == "Classic20 F8":
@@ -93,6 +109,8 @@ elif tarif == "Classic20 F8":
         mindestsparung=40,
         mindestsparzeit="1 J. 6 Mo.",
         abschlussgebuehr=1.6,
+        jahresentgelt=0.30,
+        darlehenszins=0.95,
         zins_tilgung=8
     )
 elif tarif == "Classic20 Plus F":
@@ -103,6 +121,8 @@ elif tarif == "Classic20 Plus F":
         mindestsparung=40,
         mindestsparzeit="1 J. 6 Mo.",
         abschlussgebuehr=1.6,
+        jahresentgelt=0.30,
+        darlehenszins=1.65,
         zins_tilgung=5
     )
 elif tarif == "Spar25":
@@ -113,8 +133,11 @@ elif tarif == "Spar25":
         mindestsparung=40,
         mindestsparzeit="1 J. 6 Mo.",
         abschlussgebuehr=1.6,
+        jahresentgelt=0.30,
+        darlehenszins=4.25,
         zins_tilgung=6
     )
+
 
 
 
