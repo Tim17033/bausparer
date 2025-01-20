@@ -25,6 +25,25 @@ def calculate_ansparphase(bausparsumme, monatlicher_sparbeitrag, sparzins, absch
 
     return monate, restbetrag, zinsen_gesamt, guthaben_verlauf
 
+# Berechnung der Darlehensphase
+def calculate_darlehensphase(bausparsumme, darlehenszins, zins_tilgung):
+    darlehensbetrag = bausparsumme * 0.6  # 60% der Bausparsumme als Darlehen
+    monatliche_rate = bausparsumme * zins_tilgung / 1000
+    monatlicher_zinsanteil = darlehensbetrag * (darlehenszins / 100 / 12)
+    monatlicher_tilgungsanteil = monatliche_rate - monatlicher_zinsanteil
+    laufzeit_monate = 0
+    zins_gesamt = 0
+
+    # Darlehen abzahlen
+    while darlehensbetrag > 0:
+        laufzeit_monate += 1
+        zinsen = darlehensbetrag * (darlehenszins / 100 / 12)
+        tilgung = monatliche_rate - zinsen
+        darlehensbetrag -= tilgung
+        zins_gesamt += zinsen
+
+    return laufzeit_monate, monatliche_rate, zins_gesamt
+
 # Anzeige der Tarif-Eckdaten inkl. Zuteilungszeit bei Regelsparbeitrag
 def show_tarif_details(tarif_name, sparzins, regelsparbeitrag, abschlussgebuehr, jahresentgelt, zins_tilgung, darlehenszins, bausparsumme):
     # Berechnung der Zuteilungszeit bei Regelsparbeitrag
@@ -94,29 +113,10 @@ def tarif_rechner(name, sparzins, regelsparbeitrag, abschlussgebuehr, jahresentg
             bausparsumme, monatlicher_sparbeitrag, sparzins, abschlussgebuehr, jahresentgelt, einmalzahlung
         )
 
-        # Überprüfen, ob die gewünschte Zuteilungszeit erreicht wird
-        gewuenschte_monate = int(zuteilungszeit * 12)
-        if monate_anspar > gewuenschte_monate:
-            # Berechnung der erforderlichen Sparrate
-            neue_sparrate = monatlicher_sparbeitrag
-            while True:
-                neue_monate, _, _, _ = calculate_ansparphase(
-                    bausparsumme, neue_sparrate, sparzins, abschlussgebuehr, jahresentgelt, einmalzahlung
-                )
-                if neue_monate <= gewuenschte_monate or neue_sparrate > 2000:
-                    break
-                neue_sparrate += 10
-
-            if neue_sparrate > 2000:
-                st.error(
-                    f"❌ Die gewünschte Zuteilungszeit von **{zuteilungszeit} Jahren** kann leider nicht erreicht werden, "
-                    f"da die erforderliche Sparrate den maximalen Wert überschreiten würde."
-                )
-            else:
-                st.warning(
-                    f"⚠️ Die gewünschte Zuteilungszeit von **{zuteilungszeit} Jahren** kann mit der aktuellen Sparrate nicht erreicht werden. "
-                    f"Um die Zuteilung in der gewünschten Zeit zu schaffen, müsste die monatliche Sparrate mindestens **{neue_sparrate:.2f} €** betragen."
-                )
+        # Darlehensphase berechnen
+        laufzeit_darlehen, monatliche_rate, zins_darlehen = calculate_darlehensphase(
+            bausparsumme, darlehenszins, zins_tilgung
+        )
 
         # Ergebnisse anzeigen
         st.markdown("## 📋 Ergebnisse")
@@ -126,10 +126,15 @@ def tarif_rechner(name, sparzins, regelsparbeitrag, abschlussgebuehr, jahresentg
             - Dauer bis zur Zuteilung (gewählte Sparrate): **{monate_anspar // 12} Jahre und {monate_anspar % 12} Monate**
             - Gesamtes Sparguthaben inkl. Einmalzahlung: **{guthaben:,.2f} €**
             - Insgesamt erhaltene Zinsen: **{zinsen_anspar:,.2f} €**
+
+            ### 💳 Darlehensphase
+            - Monatliche Rate (Zins + Tilgung): **{monatliche_rate:,.2f} €**
+            - Gesamte Zinskosten während der Darlehensphase: **{zins_darlehen:,.2f} €**
+            - Laufzeit des Darlehens: **{laufzeit_darlehen // 12} Jahre und {laufzeit_darlehen % 12} Monate**
             """
         )
 
-        # Ansparphase visualisieren
+        # Visualisierung der Ansparphase
         st.markdown("### 📊 Ansparverlauf")
         plt.figure(figsize=(10, 5))
         plt.plot(np.arange(len(guthaben_verlauf)), guthaben_verlauf, label="Guthaben inkl. Zinsen", color="green")
@@ -170,6 +175,7 @@ elif tarif == "Classic20 Plus F":
     tarif_rechner("Classic20 Plus F", sparzins=0.01, regelsparbeitrag=4, abschlussgebuehr=1.6, jahresentgelt=0.30, zins_tilgung=5, darlehenszins=1.65)
 elif tarif == "Spar25":
     tarif_rechner("Spar25", sparzins=0.25, regelsparbeitrag=5, abschlussgebuehr=1.6, jahresentgelt=0.30, zins_tilgung=6, darlehenszins=4.25)
+
 
 
 
