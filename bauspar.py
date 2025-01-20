@@ -47,8 +47,21 @@ def tarif_rechner(name, sparzins, regelsparbeitrag, abschlussgebuehr, jahresentg
 
     # Eingaben des Kunden
     bausparsumme = st.number_input("💰 Bausparsumme (€):", min_value=10000, max_value=500000, step=1000)
-    monatlicher_sparbeitrag = st.number_input("📅 Monatliche Rate (€):", min_value=50, max_value=2000, step=50)
-    einmalzahlung = st.number_input("💵 Einmalzahlung (€):", min_value=0, step=100)
+    if bausparsumme:
+        vorschlag_sparrate = bausparsumme * regelsparbeitrag / 1000
+        monatlicher_sparbeitrag = st.number_input(
+            f"📅 Monatliche Sparrate (Vorschlag: {vorschlag_sparrate:.2f} €, Regelsparbeitrag):",
+            min_value=50.0,
+            max_value=2000.0,
+            value=vorschlag_sparrate,
+            step=10.0,
+        )
+        st.caption("💡 Der Vorschlag basiert auf dem Regelsparbeitrag des gewählten Tarifs.")
+
+    einmalzahlung = st.number_input("💵 Einmalzahlung (€):", min_value=0.0, step=100.0)
+    zuteilungszeit = st.number_input(
+        "⏳ Gewünschte Zeit bis zur Zuteilung (in Jahren):", min_value=1.5, max_value=20.0, step=0.5
+    )
 
     if st.button("📊 Berechnung starten"):
         with st.spinner("🔄 Berechnung wird durchgeführt..."):
@@ -78,6 +91,13 @@ def tarif_rechner(name, sparzins, regelsparbeitrag, abschlussgebuehr, jahresentg
             - Dauer der Darlehensphase: **{monate_darlehen // 12} Jahre und {monate_darlehen % 12} Monate**
             """
         )
+
+        # Warnung, wenn die gewünschte Zuteilungszeit nicht eingehalten werden kann
+        if monate_anspar / 12 > zuteilungszeit:
+            st.warning(
+                f"⚠️ Die gewünschte Zuteilungszeit von **{zuteilungszeit} Jahren** kann nicht eingehalten werden. "
+                f"Die tatsächliche Ansparzeit beträgt **{monate_anspar / 12:.1f} Jahre**."
+            )
 
         # Ansparphase visualisieren
         st.markdown("### 📊 Ansparverlauf")
@@ -130,6 +150,7 @@ elif tarif == "Classic20 Plus F":
     tarif_rechner("Classic20 Plus F", sparzins=0.01, regelsparbeitrag=4, abschlussgebuehr=1.6, jahresentgelt=0.30, zins_tilgung=5, darlehenszins=1.65)
 elif tarif == "Spar25":
     tarif_rechner("Spar25", sparzins=0.25, regelsparbeitrag=5, abschlussgebuehr=1.6, jahresentgelt=0.30, zins_tilgung=6, darlehenszins=4.25)
+
 
 
 
