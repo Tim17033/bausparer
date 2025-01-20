@@ -6,7 +6,7 @@ from datetime import datetime, timedelta
 
 # Berechnung der Ansparphase
 def calculate_ansparphase(bausparsumme, monatlicher_sparbeitrag, sparzins, abschlussgebuehr, jahresentgelt, einmalzahlung):
-    restbetrag = -abschlussgebuehr + einmalzahlung  # Anfangswert: Abschlussgebühr abgezogen, Einmalzahlung hinzugefügt
+    restbetrag = -abschlussgebuehr + einmalzahlung  # Startwert mit Abschlussgebühr und Einmalzahlung
     monate = 0
     zinsen_gesamt = 0
     guthaben_verlauf = [restbetrag]
@@ -170,5 +170,6 @@ def tarif_rechner(name, sparzins, regelsparbeitrag, abschlussgebuehr, jahresentg
 
 # Hauptmenü und Tarifauswahl (bleibt unverändert)
 # Siehe vorheriger Code
+
 
 
