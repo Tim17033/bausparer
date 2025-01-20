@@ -12,7 +12,7 @@ def tarif_rechner(name, sparzins, regelsparbeitrag, mindestsparung, mindestsparz
     st.markdown(f"- **Mindestsparung:** {mindestsparung}% der Bausparsumme")
     st.markdown(f"- **Mindestsparzeit:** {mindestsparzeit}")
     st.markdown(f"- **Abschlussgebühr:** {abschlussgebuehr}% der Bausparsumme")
-    st.markdown(f"- **Jahresentgelt:** {jahresentgelt} € pro Jahr")
+    st.markdown(f"- **Jahresentgelt:** {jahresentgelt} € pro Jahr pro 1.000 € Bausparsumme (max. 30 €)")
 
     # Darlehensphase
     st.markdown("### 💳 Darlehensphase")
@@ -32,7 +32,7 @@ def tarif_rechner(name, sparzins, regelsparbeitrag, mindestsparung, mindestsparz
         monatlicher_sparbeitrag = bausparsumme * regelsparbeitrag / 1000
         mindestsparguthaben = bausparsumme * mindestsparung / 100
         abschlussgebuehr_betrag = bausparsumme * abschlussgebuehr / 100
-        jahresentgelt_betrag = (bausparsumme / 1000) * jahresentgelt
+        jahresentgelt_betrag = min((bausparsumme / 1000) * jahresentgelt, 30)
 
         # Ergebnisse anzeigen
         st.markdown("## 📋 Ergebnisse")
@@ -137,6 +137,7 @@ elif tarif == "Spar25":
         darlehenszins=4.25,
         zins_tilgung=6
     )
+
 
 
 
