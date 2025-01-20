@@ -55,7 +55,7 @@ def display_tarif_konditionen(name, sparzins, regelsparbeitrag, abschlussgebuehr
         f"""
         **Ansparphase:**
         - Sparzins: **{sparzins:.2f}%**
-        - Monatlicher Regelsparbeitrag: **{regelsparbeitrag}‰** der Bausparsumme
+        - Monatlicher Regelsparbeitrag: **{regelsparbeitrag}‰** der Bausparsumme (**{vorschlag_sparrate:.2f} €** bei {bausparsumme} € Bausparsumme)
         - Abschlussgebühr: **{abschlussgebuehr:.2f}%** der Bausparsumme
         - Jahresentgelt: **{jahresentgelt:.2f} €** pro 1.000 € Bausparsumme (max. 30 € pro Jahr)
         - Zuteilungszeit bei Regelsparbeitrag: **{monate_regelspar // 12} Jahre und {monate_regelspar % 12} Monate** (ca. **{zuteilungsdatum.strftime('%d.%m.%Y')}**)
@@ -72,7 +72,7 @@ def tarif_rechner(name, sparzins, regelsparbeitrag, abschlussgebuehr, jahresentg
     
     bausparsumme = st.number_input("💰 Bausparsumme (€):", min_value=10000, max_value=500000, step=1000)
     if bausparsumme:
-        vorschlag_sparrate = max(bausparsumme * regelsparbeitrag / 1000, 50)
+        vorschlag_sparrate = bausparsumme * regelsparbeitrag / 1000
         monatlicher_sparbeitrag = st.number_input(
             f"📅 Monatliche Sparrate (Vorschlag: {vorschlag_sparrate:.2f} €, Regelsparbeitrag):",
             min_value=50.0,
@@ -105,7 +105,7 @@ def tarif_rechner(name, sparzins, regelsparbeitrag, abschlussgebuehr, jahresentg
 
         # Prüfen, ob gewünschte Zuteilungszeit erreicht wird
         if monate_anspar / 12 > zuteilungszeit:
-            erforderliche_sparrate = monatlicher_sparbeitrag + 10  # Vorschlag
+            erforderliche_sparrate = monatlicher_sparbeitrag + 10
             st.warning(
                 f"⚠️ Die gewünschte Zuteilungszeit von **{zuteilungszeit:.1f} Jahren** kann nicht eingehalten werden. "
                 f"Die tatsächliche Ansparzeit beträgt **{monate_anspar / 12:.1f} Jahre**. "
@@ -172,6 +172,7 @@ elif tarif == "Classic20 Plus F":
 elif tarif == "Spar25":
     display_tarif_konditionen("Spar25", 0.25, 5, 1.6, 0.30, 6, 4.25, 10000, 0)
     tarif_rechner("Spar25", 0.25, 5, 1.6, 0.30, 6, 4.25)
+
 
 
 
