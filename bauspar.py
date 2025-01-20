@@ -1,12 +1,11 @@
 import streamlit as st
 import matplotlib.pyplot as plt
-import numpy as np
 import pandas as pd
 from datetime import datetime, timedelta
 import time
 
 # Berechnung der Ansparphase
-def calculate_ansparphase_with_pandas(bausparsumme, monatlicher_sparbeitrag, sparzins, abschlussgebuehr, jahresentgelt, einmalzahlung):
+def calculate_ansparphase(bausparsumme, monatlicher_sparbeitrag, sparzins, abschlussgebuehr, jahresentgelt, einmalzahlung):
     restbetrag = -abschlussgebuehr + einmalzahlung
     mindestsparguthaben = bausparsumme * 0.4
     monate = 0
@@ -25,7 +24,7 @@ def calculate_ansparphase_with_pandas(bausparsumme, monatlicher_sparbeitrag, spa
     return df
 
 # Berechnung der Darlehensphase
-def calculate_darlehensphase_with_pandas(bausparsumme, darlehenszins, zins_tilgung):
+def calculate_darlehensphase(bausparsumme, darlehenszins, zins_tilgung):
     darlehensbetrag = bausparsumme * 0.6
     monatliche_rate = bausparsumme * zins_tilgung / 1000
     laufzeit_monate = 0
@@ -43,15 +42,15 @@ def calculate_darlehensphase_with_pandas(bausparsumme, darlehenszins, zins_tilgu
     return df
 
 # Tarifdetails anzeigen
-def show_tarif_details(tarif_name, sparzins, regelsparbeitrag, abschlussgebuehr, jahresentgelt, zins_tilgung, darlehenszins, bausparsumme, einmalzahlung):
+def display_tarif_konditionen(name, sparzins, regelsparbeitrag, abschlussgebuehr, jahresentgelt, zins_tilgung, darlehenszins, bausparsumme, einmalzahlung):
     vorschlag_sparrate = bausparsumme * regelsparbeitrag / 1000
-    df_anspar = calculate_ansparphase_with_pandas(
+    df_anspar = calculate_ansparphase(
         bausparsumme, vorschlag_sparrate, sparzins, abschlussgebuehr, jahresentgelt, einmalzahlung
     )
     monate_regelspar = len(df_anspar)
     zuteilungsdatum = datetime.now() + timedelta(days=(monate_regelspar * 30))
 
-    st.markdown(f"### Tarifkonditionen – {tarif_name}")
+    st.markdown(f"### Tarifkonditionen – {name}")
     st.markdown(
         f"""
         **Ansparphase:**
@@ -78,7 +77,7 @@ def tarif_rechner(name, sparzins, regelsparbeitrag, abschlussgebuehr, jahresentg
             f"📅 Monatliche Sparrate (Vorschlag: {vorschlag_sparrate:.2f} €, Regelsparbeitrag):",
             min_value=50.0,
             max_value=2000.0,
-            value=float(vorschlag_sparrate),  # Fix: Konvertiere zu float
+            value=float(vorschlag_sparrate),
             step=10.0,
         )
         st.caption("💡 Der Vorschlag basiert auf dem Regelsparbeitrag des gewählten Tarifs.")
@@ -91,7 +90,7 @@ def tarif_rechner(name, sparzins, regelsparbeitrag, abschlussgebuehr, jahresentg
             time.sleep(2)
 
         # Ansparphase berechnen
-        df_anspar = calculate_ansparphase_with_pandas(
+        df_anspar = calculate_ansparphase(
             bausparsumme, monatlicher_sparbeitrag, sparzins, abschlussgebuehr, jahresentgelt, einmalzahlung
         )
 
@@ -99,7 +98,7 @@ def tarif_rechner(name, sparzins, regelsparbeitrag, abschlussgebuehr, jahresentg
         zinsen_anspar = df_anspar["Zinsen"].sum()
 
         # Regelsparbeitrag für Vergleich
-        regelsparzeit_df = calculate_ansparphase_with_pandas(
+        regelsparzeit_df = calculate_ansparphase(
             bausparsumme, bausparsumme * regelsparbeitrag / 1000, sparzins, abschlussgebuehr, jahresentgelt, einmalzahlung
         )
         regelsparzeit_monate = len(regelsparzeit_df)
@@ -114,7 +113,7 @@ def tarif_rechner(name, sparzins, regelsparbeitrag, abschlussgebuehr, jahresentg
             )
 
         # Darlehensphase berechnen
-        df_darlehen = calculate_darlehensphase_with_pandas(
+        df_darlehen = calculate_darlehensphase(
             bausparsumme, darlehenszins, zins_tilgung
         )
         laufzeit_darlehen = len(df_darlehen)
@@ -156,17 +155,24 @@ tarif = st.radio(
 
 # Tarifdetails und Berechnungen
 if tarif == "Classic20 F3":
+    display_tarif_konditionen("Classic20 F3", 0.05, 3, 1.6, 0.30, 3.5, 2.25, 10000, 0)
     tarif_rechner("Classic20 F3", 0.05, 3, 1.6, 0.30, 3.5, 2.25)
 elif tarif == "Sprint22":
+    display_tarif_konditionen("Sprint22", 0.05, 7, 1.6, 0.30, 6, 1.75, 10000, 0)
     tarif_rechner("Sprint22", 0.05, 7, 1.6, 0.30, 6, 1.75)
 elif tarif == "Komfort22":
+    display_tarif_konditionen("Komfort22", 0.05, 3, 1.6, 0.30, 7, 2.35, 10000, 0)
     tarif_rechner("Komfort22", 0.05, 3, 1.6, 0.30, 7, 2.35)
 elif tarif == "Classic20 F8":
+    display_tarif_konditionen("Classic20 F8", 0.05, 3, 1.6, 0.30, 8, 0.95, 10000, 0)
     tarif_rechner("Classic20 F8", 0.05, 3, 1.6, 0.30, 8, 0.95)
 elif tarif == "Classic20 Plus F":
+    display_tarif_konditionen("Classic20 Plus F", 0.01, 4, 1.6, 0.30, 5, 1.65, 10000, 0)
     tarif_rechner("Classic20 Plus F", 0.01, 4, 1.6, 0.30, 5, 1.65)
 elif tarif == "Spar25":
+    display_tarif_konditionen("Spar25", 0.25, 5, 1.6, 0.30, 6, 4.25, 10000, 0)
     tarif_rechner("Spar25", 0.25, 5, 1.6, 0.30, 6, 4.25)
+
 
 
 
