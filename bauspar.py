@@ -42,9 +42,29 @@ def calculate_darlehensphase_with_pandas(bausparsumme, darlehenszins, zins_tilgu
     df = pd.DataFrame(data)
     return df
 
+# Tarifkonditionen anzeigen
+def display_tarif_konditionen(name, sparzins, regelsparbeitrag, abschlussgebuehr, jahresentgelt, zins_tilgung, darlehenszins):
+    regelsparrate = regelsparbeitrag / 1000
+    regelsparzeit = int(40 / regelsparrate)  # Mindestsparguthaben = 40% der Bausparsumme
+    regelsparzeit_monate = int((40 % regelsparrate) * 12 / regelsparrate)
+    regelsparzeit_datum = datetime.now() + timedelta(days=(regelsparzeit * 365) + (regelsparzeit_monate * 30))
+
+    st.markdown(f"### Tarifkonditionen – {name}")
+    st.markdown("#### Ansparphase:")
+    st.markdown(f"- **Sparzins:** {sparzins:.2f}%")
+    st.markdown(f"- **Monatlicher Regelsparbeitrag:** {regelsparbeitrag}‰ der Bausparsumme")
+    st.markdown(f"- **Abschlussgebühr:** {abschlussgebuehr:.2f}% der Bausparsumme")
+    st.markdown(f"- **Jahresentgelt:** {jahresentgelt:.2f} € pro 1.000 € Bausparsumme (max. 30 € pro Jahr)")
+    st.markdown(f"- **Zuteilungszeit bei Regelsparbeitrag:** {regelsparzeit} Jahre und {regelsparzeit_monate} Monate (ca. {regelsparzeit_datum.strftime('%d.%m.%Y')})")
+    st.markdown("#### Darlehensphase:")
+    st.markdown(f"- **Fester Sollzins:** {darlehenszins:.2f}%")
+    st.markdown(f"- **Monatliche Zins- und Tilgungsrate:** {zins_tilgung:.1f}‰ der Bausparsumme")
+
 # Hauptrechner
 def tarif_rechner(name, sparzins, regelsparbeitrag, abschlussgebuehr, jahresentgelt, zins_tilgung, darlehenszins):
-    st.markdown(f"### 📝 Geben Sie Ihre Daten ein:")
+    display_tarif_konditionen(name, sparzins, regelsparbeitrag, abschlussgebuehr, jahresentgelt, zins_tilgung, darlehenszins)
+
+    st.markdown("### 📝 Geben Sie Ihre Daten ein:")
     bausparsumme = st.number_input("💰 Bausparsumme (€):", min_value=10000, max_value=500000, step=1000)
     einmalzahlung = st.number_input("💵 Einmalzahlung (€):", min_value=0.0, step=100.0)
 
