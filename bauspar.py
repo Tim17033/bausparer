@@ -70,15 +70,18 @@ def tarif_rechner(name, sparzins, regelsparbeitrag, abschlussgebuehr, jahresentg
     st.title(f"🏠 LBS Bausparrechner – {name}")
 
     # Eingaben des Kunden
-    bausparsumme = st.number_input("💰 Bausparsumme (€):", min_value=10000, max_value=500000, step=1000)
-    if bausparsumme:
-        vorschlag_sparrate = bausparsumme * regelsparbeitrag / 1000
-        monatlicher_sparbeitrag = st.number_input(
-            f"📅 Monatliche Sparrate (Vorschlag: {vorschlag_sparrate:.2f} €, Regelsparbeitrag):",
-            min_value=50.0,
-            max_value=2000.0,
-            value=vorschlag_sparrate,
-            step=10.0,
+  if bausparsumme:
+    # Vorschlag für monatliche Sparrate basierend auf Regelsparbeitrag oder mindestens 50 €
+    vorschlag_sparrate = max(bausparsumme * regelsparbeitrag / 1000, 50)  
+    monatlicher_sparbeitrag = st.number_input(
+        f"📅 Monatliche Sparrate (Vorschlag: {vorschlag_sparrate:.2f} €, Regelsparbeitrag):",
+        min_value=50.0,  # Minimalwert 50 €
+        max_value=2000.0,
+        value=vorschlag_sparrate,
+        step=10.0,
+    )
+    st.caption("💡 Der Vorschlag basiert auf dem Regelsparbeitrag des gewählten Tarifs.")
+
         )
         st.caption("💡 Der Vorschlag basiert auf dem Regelsparbeitrag des gewählten Tarifs.")
 
