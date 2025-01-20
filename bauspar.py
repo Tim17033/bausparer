@@ -63,7 +63,6 @@ def display_tarif_konditionen(name, sparzins, regelsparbeitrag, abschlussgebuehr
     )
     monatliche_darlehensrate = darlehensphase_df["Tilgung"].iloc[0] + darlehensphase_df["Zinsen"].iloc[0]
     laufzeit_darlehen = len(darlehensphase_df)
-    zinskosten_darlehen = darlehensphase_df["Zinsen"].sum()
 
     st.markdown(f"### Tarifkonditionen – {name}")
     st.markdown(
@@ -80,7 +79,6 @@ def display_tarif_konditionen(name, sparzins, regelsparbeitrag, abschlussgebuehr
         - Fester Sollzins: **{darlehenszins:.2f}%**
         - Zins- und Tilgungsrate: **{zins_tilgung}‰** der Bausparsumme
         - Laufzeit des Darlehens: **{laufzeit_darlehen // 12} Jahre und {laufzeit_darlehen % 12} Monate**
-        - Gesamte Zinskosten während der Darlehensphase: **{zinskosten_darlehen:,.2f} €**
         """
     )
 
