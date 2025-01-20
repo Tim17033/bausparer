@@ -178,3 +178,4 @@ elif tarif == "Classic20 Plus F":
     tarif_rechner("Classic20 Plus F", 0.01, 4, 1.6, 0.30, 5, 1.65)
 elif tarif == "Spar25":
     tarif_rechner("Spar25", 0.25, 5, 1.6, 0.30, 6, 4.25)
+
