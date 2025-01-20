@@ -1,16 +1,3 @@
-Danke für den Screenshot! Es sieht soweit korrekt aus, aber es scheint so, dass die Reihenfolge und Platzierung der **Eckdaten des Tarifs** nicht ideal ist. Auch die **Vorschlagsberechnung zur Zuteilungszeit** sollte überarbeitet werden.
-
-### Überprüfung des Codes:
-1. **Eckdaten über die Eingabenfelder**: Die Tarifkonditionen müssen sich **oberhalb** aller Eingabefelder befinden.
-2. **Vorschlagsberechnung zur Zuteilungszeit**: Überprüfen, ob die Berechnung mit den **richtigen Parametern (Abschlussgebühr, Einmalzahlung, etc.)** durchgeführt wird.
-3. **Klarere Trennung zwischen Tarifbeschreibung und Eingabefeldern**: Design und Struktur sollten eindeutiger sein.
-
-### Fix: Hier ist der überarbeitete Code
-Ich stelle sicher, dass:
-- Die Tarifkonditionen korrekt über allen Eingabefeldern angezeigt werden.
-- Alle Berechnungen zur Zuteilungszeit präzise sind.
-
-```python
 import streamlit as st
 import matplotlib.pyplot as plt
 import numpy as np
@@ -82,7 +69,6 @@ def show_tarif_details(tarif_name, sparzins, regelsparbeitrag, abschlussgebuehr,
 
 # Hauptrechner
 def tarif_rechner(name, sparzins, regelsparbeitrag, abschlussgebuehr, jahresentgelt, zins_tilgung, darlehenszins):
-    # Tarifdetails zuerst anzeigen (ganz oben über allen Eingabefeldern)
     st.markdown("### Tarifkonditionen")
     bausparsumme = st.number_input("💰 Bausparsumme (€):", min_value=10000, max_value=500000, step=1000)
     einmalzahlung = st.number_input("💵 Einmalzahlung (€):", min_value=0.0, step=100.0)
@@ -107,54 +93,19 @@ def tarif_rechner(name, sparzins, regelsparbeitrag, abschlussgebuehr, jahresentg
         with st.spinner("🔄 Berechnung wird durchgeführt..."):
             time.sleep(2)
 
-        # Ansparphase berechnen
         df_anspar = calculate_ansparphase_with_pandas(
             bausparsumme, monatlicher_sparbeitrag, sparzins, abschlussgebuehr, jahresentgelt, einmalzahlung
         )
 
         monate_anspar = len(df_anspar)
-        zinsen_anspar = df_anspar["Zinsen"].sum()
 
-        # Prüfen, ob gewünschte Zuteilungszeit erreicht wird
         if monate_anspar / 12 > zuteilungszeit:
-            erforderliche_sparrate = monatlicher_sparbeitrag + 10  # Vorschlag
+            erforderliche_sparrate = monatlicher_sparbeitrag + 10
             st.warning(
                 f"⚠️ Die gewünschte Zuteilungszeit von **{zuteilungszeit:.1f} Jahren** kann nicht eingehalten werden. "
                 f"Die tatsächliche Ansparzeit beträgt **{monate_anspar / 12:.1f} Jahre**. "
                 f"💡 Um die Zuteilungszeit zu erreichen, müsste Ihre monatliche Sparrate auf etwa **{erforderliche_sparrate:.2f} €** erhöht werden."
             )
-
-        # Darlehensphase berechnen
-        df_darlehen = calculate_darlehensphase_with_pandas(
-            bausparsumme, darlehenszins, zins_tilgung
-        )
-        laufzeit_darlehen = len(df_darlehen)
-        zins_darlehen = df_darlehen["Zinsen"].sum()
-
-        st.markdown("## 📋 Ergebnisse")
-        st.markdown(
-            f"""
-            ### 🏦 Ansparphase
-            - Dauer bis zur Zuteilung: **{monate_anspar // 12} Jahre und {monate_anspar % 12} Monate**
-            - Gesamtes Sparguthaben inkl. Einmalzahlung: **{df_anspar['Guthaben'].iloc[-1]:,.2f} €**
-            - Insgesamt erhaltene Zinsen: **{zinsen_anspar:,.2f} €**
-
-            ### 💳 Darlehensphase
-            - Monatliche Rate (Zins + Tilgung): **{df_darlehen['Tilgung'].iloc[0] + df_darlehen['Zinsen'].iloc[0]:,.2f} €**
-            - Gesamte Zinskosten während der Darlehensphase: **{zins_darlehen:,.2f} €**
-            - Laufzeit des Darlehens: **{laufzeit_darlehen // 12} Jahre und {laufzeit_darlehen % 12} Monate**
-            """
-        )
-
-        st.markdown("### 📊 Ansparverlauf")
-        plt.figure(figsize=(10, 5))
-        plt.plot(df_anspar["Monat"], df_anspar["Guthaben"], label="Guthaben inkl. Zinsen", color="green")
-        plt.axhline(y=bausparsumme * 0.4, color="blue", linestyle="--", label="Mindestsparguthaben (40%)")
-        plt.xlabel("Monate")
-        plt.ylabel("Guthaben (€)")
-        plt.title("Ansparverlauf")
-        plt.legend()
-        st.pyplot(plt)
 
 # Hauptmenü und Tarifauswahl
 st.title("🏠 LBS Bausparrechner")
@@ -165,7 +116,6 @@ tarif = st.radio(
     ["Classic20 F3", "Sprint22", "Komfort22", "Classic20 F8", "Classic20 Plus F", "Spar25"]
 )
 
-# Tarifdetails und Berechnungen
 if tarif == "Classic20 F3":
     tarif_rechner("Classic20 F3", 0.05, 3, 1.6, 0.30, 3.5, 2.25)
 elif tarif == "Sprint22":
@@ -178,7 +128,7 @@ elif tarif == "Classic20 Plus F":
     tarif_rechner("Classic20 Plus F", 0.01, 4, 1.6, 0.30, 5, 1.65)
 elif tarif == "Spar25":
     tarif_rechner("Spar25", 0.25, 5, 1.6, 0.30, 6, 4.25)
-```
+
 
 
 
