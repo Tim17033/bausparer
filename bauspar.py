@@ -57,6 +57,23 @@ def calculate_required_rate(bausparsumme, sparzins, abschlussgebuehr, jahresentg
     )
     return r
 
+# Funktion zur Anzeige der Tarifkonditionen
+def show_tarif_details(tarif_name, sparzins, regelsparbeitrag, abschlussgebuehr, jahresentgelt, zins_tilgung, darlehenszins):
+    st.markdown(f"### Tarifkonditionen – {tarif_name}")
+    st.markdown(
+        f"""
+        **Ansparphase:**
+        - Sparzins: **{sparzins:.2f}%**
+        - Monatlicher Regelsparbeitrag: **{regelsparbeitrag}‰** der Bausparsumme
+        - Abschlussgebühr: **{abschlussgebuehr:.2f}%** der Bausparsumme
+        - Jahresentgelt: **{jahresentgelt:.2f} €** pro 1.000 € Bausparsumme (max. 30 € pro Jahr)
+
+        **Darlehensphase:**
+        - Fester Sollzins: **{darlehenszins:.2f}%**
+        - Zins- und Tilgungsbeitrag: **{zins_tilgung}‰** der Bausparsumme (monatlich)
+        """
+    )
+
 # Funktionsdefinition für den Tarifrechner
 def tarif_rechner(name, sparzins, regelsparbeitrag, abschlussgebuehr, jahresentgelt, zins_tilgung, darlehenszins):
     st.title(f"🏠 LBS Bausparrechner – {name}")
@@ -100,11 +117,6 @@ def tarif_rechner(name, sparzins, regelsparbeitrag, abschlussgebuehr, jahresentg
                 f"💡 Um die Zuteilungszeit zu erreichen, müsste Ihre monatliche Sparrate **{required_rate:.2f} €** betragen."
             )
 
-        # Darlehensphase berechnen
-        monate_darlehen, restschuld_verlauf = calculate_darlehensphase(
-            bausparsumme, zins_tilgung, darlehenszins
-        )
-
         # Ergebnisse anzeigen
         st.markdown("## 📋 Ergebnisse")
         st.markdown(
@@ -113,10 +125,6 @@ def tarif_rechner(name, sparzins, regelsparbeitrag, abschlussgebuehr, jahresentg
             - Dauer bis zur Zuteilung: **{monate_anspar // 12} Jahre und {monate_anspar % 12} Monate**
             - Gesamtes Sparguthaben inkl. Einmalzahlung: **{guthaben:,.2f} €**
             - Insgesamt erhaltene Zinsen: **{zinsen_anspar:,.2f} €**
-
-            ### 💳 Darlehensphase
-            - Monatliche Rate: **{bausparsumme * zins_tilgung / 1000:,.2f} €**
-            - Dauer der Darlehensphase: **{monate_darlehen // 12} Jahre und {monate_darlehen % 12} Monate**
             """
         )
 
@@ -128,16 +136,6 @@ def tarif_rechner(name, sparzins, regelsparbeitrag, abschlussgebuehr, jahresentg
         plt.title("Ansparverlauf")
         plt.xlabel("Monate")
         plt.ylabel("Guthaben (€)")
-        plt.legend()
-        st.pyplot(plt)
-
-        # Darlehensphase visualisieren
-        st.markdown("### 📊 Darlehensverlauf")
-        plt.figure(figsize=(10, 5))
-        plt.plot(np.arange(len(restschuld_verlauf)), restschuld_verlauf, label="Restschuld", color="red")
-        plt.title("Darlehensverlauf")
-        plt.xlabel("Monate")
-        plt.ylabel("Restschuld (€)")
         plt.legend()
         st.pyplot(plt)
 
@@ -160,14 +158,20 @@ tarif = st.radio(
 
 # Tarifdetails und Berechnungen
 if tarif == "Classic20 F3":
+    show_tarif_details("Classic20 F3", sparzins=0.05, regelsparbeitrag=3, abschlussgebuehr=1.6, jahresentgelt=0.30, zins_tilgung=3.5, darlehenszins=2.25)
     tarif_rechner("Classic20 F3", sparzins=0.05, regelsparbeitrag=3, abschlussgebuehr=1.6, jahresentgelt=0.30, zins_tilgung=3.5, darlehenszins=2.25)
 elif tarif == "Sprint22":
+    show_tarif_details("Sprint22", sparzins=0.05, regelsparbeitrag=7, abschlussgebuehr=1.6, jahresentgelt=0.30, zins_tilgung=6, darlehenszins=1.75)
     tarif_rechner("Sprint22", sparzins=0.05, regelsparbeitrag=7, abschlussgebuehr=1.6, jahresentgelt=0.30, zins_tilgung=6, darlehenszins=1.75)
 elif tarif == "Komfort22":
+    show_tarif_details("Komfort22", sparzins=0.05, regelsparbeitrag=3, abschlussgebuehr=1.6, jahresentgelt=0.30, zins_tilgung=7, darlehenszins=2.35)
     tarif_rechner("Komfort22", sparzins=0.05, regelsparbeitrag=3, abschlussgebuehr=1.6, jahresentgelt=0.30, zins_tilgung=7, darlehenszins=2.35)
 elif tarif == "Classic20 F8":
+    show_tarif_details("Classic20 F8", sparzins=0.05, regelsparbeitrag=3, abschlussgebuehr=1.6, jahresentgelt=0.30, zins_tilgung=8, darlehenszins=0.95)
     tarif_rechner("Classic20 F8", sparzins=0.05, regelsparbeitrag=3, abschlussgebuehr=1.6, jahresentgelt=0.30, zins_tilgung=8, darlehenszins=0.95)
 elif tarif == "Classic20 Plus F":
+    show_tarif_details("Classic20 Plus F", sparzins=0.01, regelsparbeitrag=4, abschlussgebuehr=1.6, jahresentgelt=0.30, zins_tilgung=5, darlehenszins=1.65)
     tarif_rechner("Classic20 Plus F", sparzins=0.01, regelsparbeitrag=4, abschlussgebuehr=1.6, jahresentgelt=0.30, zins_tilgung=5, darlehenszins=1.65)
 elif tarif == "Spar25":
+    show_tarif_details("Spar25", sparzins=0.25, regelsparbeitrag=5, abschlussgebuehr=1.6, jahresentgelt=0.30, zins_tilgung=6, darlehenszins=4.25)
     tarif_rechner("Spar25", sparzins=0.25, regelsparbeitrag=5, abschlussgebuehr=1.6, jahresentgelt=0.30, zins_tilgung=6, darlehenszins=4.25)
