@@ -69,14 +69,9 @@ def show_tarif_details(tarif_name, sparzins, regelsparbeitrag, abschlussgebuehr,
 
 # Hauptrechner
 def tarif_rechner(name, sparzins, regelsparbeitrag, abschlussgebuehr, jahresentgelt, zins_tilgung, darlehenszins):
-    # Tarifdetails zuerst anzeigen (ganz oben über allen Eingabefeldern)
-    st.markdown("### Tarifkonditionen")
+    st.title(f"🏠 LBS Bausparrechner – {name}")
+    
     bausparsumme = st.number_input("💰 Bausparsumme (€):", min_value=10000, max_value=500000, step=1000)
-    einmalzahlung = st.number_input("💵 Einmalzahlung (€):", min_value=0.0, step=100.0)
-    show_tarif_details(
-        name, sparzins, regelsparbeitrag, abschlussgebuehr, jahresentgelt, zins_tilgung, darlehenszins, bausparsumme, einmalzahlung
-    )
-
     if bausparsumme:
         vorschlag_sparrate = max(bausparsumme * regelsparbeitrag / 1000, 50)
         monatlicher_sparbeitrag = st.number_input(
@@ -88,6 +83,7 @@ def tarif_rechner(name, sparzins, regelsparbeitrag, abschlussgebuehr, jahresentg
         )
         st.caption("💡 Der Vorschlag basiert auf dem Regelsparbeitrag des gewählten Tarifs.")
 
+    einmalzahlung = st.number_input("💵 Einmalzahlung (€):", min_value=0.0, step=100.0)
     zuteilungszeit = st.number_input("⏳ Gewünschte Zeit bis zur Zuteilung (in Jahren):", min_value=1.5, max_value=20.0, step=0.5)
 
     if st.button("📊 Berechnung starten"):
@@ -101,6 +97,12 @@ def tarif_rechner(name, sparzins, regelsparbeitrag, abschlussgebuehr, jahresentg
 
         monate_anspar = len(df_anspar)
         zinsen_anspar = df_anspar["Zinsen"].sum()
+
+        # Regelsparbeitrag für Vergleich
+        regelsparzeit_df = calculate_ansparphase_with_pandas(
+            bausparsumme, bausparsumme * regelsparbeitrag / 1000, sparzins, abschlussgebuehr, jahresentgelt, einmalzahlung
+        )
+        regelsparzeit_monate = len(regelsparzeit_df)
 
         # Prüfen, ob gewünschte Zuteilungszeit erreicht wird
         if monate_anspar / 12 > zuteilungszeit:
@@ -165,6 +167,7 @@ elif tarif == "Classic20 Plus F":
     tarif_rechner("Classic20 Plus F", 0.01, 4, 1.6, 0.30, 5, 1.65)
 elif tarif == "Spar25":
     tarif_rechner("Spar25", 0.25, 5, 1.6, 0.30, 6, 4.25)
+
 
 
 
