@@ -48,7 +48,7 @@ def calculate_adjusted_sparrate(bausparsumme, abschlussgebuehr, sparzins, jahres
     monatlicher_sparbeitrag = (mindestsparguthaben - restbetrag) / monate + (jahresentgelt_betrag / 12)
     return monatlicher_sparbeitrag
 
-# Anzeige der Tarifkonditionen
+# Anzeige der Tarifkonditionen mit Darlehensphaseninformationen
 def display_tarif_konditionen(name, sparzins, regelsparbeitrag, abschlussgebuehr, jahresentgelt, zins_tilgung, darlehenszins, bausparsumme):
     vorschlag_sparrate = bausparsumme * regelsparbeitrag / 1000
     df_regelspar = calculate_ansparphase_with_pandas(
@@ -77,9 +77,10 @@ def display_tarif_konditionen(name, sparzins, regelsparbeitrag, abschlussgebuehr
         - Zuteilungszeit bei Regelsparbeitrag: **{monate_regelspar // 12} Jahre und {monate_regelspar % 12} Monate** (ca. **{zuteilungsdatum.strftime('%d.%m.%Y')}**)
 
         **Darlehensphase:**
-        - Monatliche Rate (Zins + Tilgung): **{monatliche_darlehensrate:,.2f} €**
-        - Gesamte Zinskosten während der Darlehensphase: **{zinskosten_darlehen:,.2f} €**
+        - Fester Sollzins: **{darlehenszins:.2f}%**
+        - Zins- und Tilgungsrate: **{zins_tilgung}‰** der Bausparsumme
         - Laufzeit des Darlehens: **{laufzeit_darlehen // 12} Jahre und {laufzeit_darlehen % 12} Monate**
+        - Gesamte Zinskosten während der Darlehensphase: **{zinskosten_darlehen:,.2f} €**
         """
     )
 
