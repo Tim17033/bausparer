@@ -41,6 +41,30 @@ def calculate_darlehensphase(bausparsumme, zins_tilgung, darlehenszins):
 
     return monate, restschuld_verlauf
 
+# Berechnung der erforderlichen Sparrate für eine gewünschte Zuteilungszeit
+def calculate_required_rate(bausparsumme, sparzins, abschlussgebuehr, jahresentgelt, einmalzahlung, zuteilungszeit):
+    restbetrag = -abschlussgebuehr  # Anfangswert: Abschlussgebühr
+    monate = 0
+    mindestsparguthaben = bausparsumme * 0.4
+    monatlicher_sparbeitrag = 50  # Startwert
+
+    while True:
+        restbetrag = -abschlussgebuehr + einmalzahlung  # Zurücksetzen
+        monate = 0
+
+        while restbetrag < mindestsparguthaben and monate < zuteilungszeit * 12:
+            zinsen = max(0, restbetrag) * (sparzins / 100 / 12)
+            jahresentgelt_betrag = min((bausparsumme / 1000) * jahresentgelt, 30) / 12
+            sparbetrag = monatlicher_sparbeitrag - jahresentgelt_betrag
+            restbetrag += sparbetrag + zinsen
+            monate += 1
+
+        if monate <= zuteilungszeit * 12:
+            break
+        monatlicher_sparbeitrag += 10  # Erhöhe die Sparrate um 10 €
+
+    return monatlicher_sparbeitrag
+
 # Funktionsdefinition für den Tarifrechner
 def tarif_rechner(name, sparzins, regelsparbeitrag, abschlussgebuehr, jahresentgelt, zins_tilgung, darlehenszins):
     st.title(f"🏠 LBS Bausparrechner – {name}")
@@ -72,6 +96,17 @@ def tarif_rechner(name, sparzins, regelsparbeitrag, abschlussgebuehr, jahresentg
             bausparsumme, monatlicher_sparbeitrag, sparzins, abschlussgebuehr, jahresentgelt, einmalzahlung
         )
 
+        # Warnung und Lösungsvorschlag, wenn die gewünschte Zuteilungszeit nicht erreicht wird
+        if monate_anspar / 12 > zuteilungszeit:
+            required_rate = calculate_required_rate(
+                bausparsumme, sparzins, abschlussgebuehr, jahresentgelt, einmalzahlung, zuteilungszeit
+            )
+            st.warning(
+                f"⚠️ Die gewünschte Zuteilungszeit von **{zuteilungszeit} Jahren** kann nicht eingehalten werden. "
+                f"Die tatsächliche Ansparzeit beträgt **{monate_anspar / 12:.1f} Jahre**.\n"
+                f"💡 Um die Zuteilungszeit zu erreichen, müsste Ihre monatliche Sparrate **{required_rate:.2f} €** betragen."
+            )
+
         # Darlehensphase berechnen
         monate_darlehen, restschuld_verlauf = calculate_darlehensphase(
             bausparsumme, zins_tilgung, darlehenszins
@@ -91,13 +126,6 @@ def tarif_rechner(name, sparzins, regelsparbeitrag, abschlussgebuehr, jahresentg
             - Dauer der Darlehensphase: **{monate_darlehen // 12} Jahre und {monate_darlehen % 12} Monate**
             """
         )
-
-        # Warnung, wenn die gewünschte Zuteilungszeit nicht eingehalten werden kann
-        if monate_anspar / 12 > zuteilungszeit:
-            st.warning(
-                f"⚠️ Die gewünschte Zuteilungszeit von **{zuteilungszeit} Jahren** kann nicht eingehalten werden. "
-                f"Die tatsächliche Ansparzeit beträgt **{monate_anspar / 12:.1f} Jahre**."
-            )
 
         # Ansparphase visualisieren
         st.markdown("### 📊 Ansparverlauf")
@@ -150,6 +178,7 @@ elif tarif == "Classic20 Plus F":
     tarif_rechner("Classic20 Plus F", sparzins=0.01, regelsparbeitrag=4, abschlussgebuehr=1.6, jahresentgelt=0.30, zins_tilgung=5, darlehenszins=1.65)
 elif tarif == "Spar25":
     tarif_rechner("Spar25", sparzins=0.25, regelsparbeitrag=5, abschlussgebuehr=1.6, jahresentgelt=0.30, zins_tilgung=6, darlehenszins=4.25)
+
 
 
 
