@@ -100,7 +100,7 @@ def display_tarif_konditionen(name, sparzins, regelsparbeitrag, abschlussgebuehr
 
     st.markdown(f"### Tarifkonditionen – {name}")
     st.markdown(
-        f""""
+        f"""
         **Ansparphase:**
         - Sparzins: **{sparzins:.2f}%**
         - Monatlicher Regelsparbeitrag: **{regelsparbeitrag}‰** der Bausparsumme
@@ -114,68 +114,68 @@ def display_tarif_konditionen(name, sparzins, regelsparbeitrag, abschlussgebuehr
         - Zins- und Tilgungsrate: **{zins_tilgung}‰** der Bausparsumme
         - Laufzeit des Darlehens: **{laufzeit_darlehen // 12} Jahre und {laufzeit_darlehen % 12} Monate**
         """
-    )"""
-"""
-# Hauptrechner"""
-def tarif_rechner(name, sparzins, regelsparbeitrag, abschlussgebuehr, jahresentgelt, zins_tilgung, darlehenszins):"""
-    st.title(f"🏡 LBS Bausparrechner – {name}")""""
-    """
-    bausparsumme = st.number_input("💰 Bausparsumme (€):", min_value=10000, max_value=500000, step=1000)"""
-    if bausparsumme:"""
-        display_tarif_konditionen(name, sparzins, regelsparbeitrag, abschlussgebuehr, jahresentgelt, zins_tilgung, darlehenszins, bausparsumme)"""
-        vorschlag_sparrate = bausparsumme * regelsparbeitrag / 1000"""
-        monatlicher_sparbeitrag = st.number_input("""
-            f"📅 Monatliche Sparrate (Vorschlag: {vorschlag_sparrate:.2f} €, Regelsparbeitrag):",""""
-            min_value=1.0,  # Mindestwert angepasst auf 1 €"""
-            max_value=2000.0,"""
-            value=float(max(1.0, vorschlag_sparrate)),"""
-            step=10.0,"""
-        )"""
-        st.caption("💡 Der Vorschlag basiert auf dem Regelsparbeitrag des gewählten Tarifs.")"""
-"""
-    einmalzahlung = st.number_input("💵 Einmalzahlung (€):", min_value=0.0, step=100.0)"""
-    zuteilungszeit = st.number_input("⏳ Gewünschte Zeit bis zur Zuteilung (in Jahren):", min_value=1.5, max_value=20.0, step=0.5)"""
-"""
-    if st.button("📊 Berechnung starten"):"""
-        with st.spinner("🔄 Berechnung wird durchgeführt..."):"""
-            time.sleep(2)"""
-"""
-        df_anspar = calculate_ansparphase_with_pandas("""
-            bausparsumme, monatlicher_sparbeitrag, sparzins, abschlussgebuehr, jahresentgelt, einmalzahlung"""
-        )"""
-"""
-        monate_anspar = len(df_anspar)"""
-        zinsen_anspar = df_anspar["Zinsen"].sum()"""
-        angespartes_guthaben = df_anspar["Guthaben"].iloc[-1]"""
-"""
-        if monate_anspar / 12 > zuteilungszeit:"""
-            erforderliche_sparrate = calculate_adjusted_sparrate("""
-                bausparsumme, abschlussgebuehr, sparzins, jahresentgelt, zuteilungszeit, einmalzahlung"""
-            )"""
-            st.warning("""
-                f"⚠️ Die gewünschte Zuteilungszeit von **{zuteilungszeit:.1f} Jahren** kann nicht eingehalten werden. """""
-                f"Tatsächliche Ansparzeit: **{monate_anspar / 12:.1f} Jahre**. """""
-                f"💡 Um die Zuteilungszeit zu erreichen, müsste Ihre Sparrate auf etwa **{erforderliche_sparrate:.2f} €** erhöht werden."""""
-            )"""
-"""
-        df_darlehen = calculate_darlehensphase_with_pandas("""
-            bausparsumme, angespartes_guthaben, darlehenszins, zins_tilgung"""
-        )"""
-        laufzeit_darlehen = len(df_darlehen)"""
-        zins_darlehen = df_darlehen["Zinsen"].sum()"""
-"""
-        st.markdown("## 📋 Ergebnisse")"""
-        st.markdown("""
-            f""""
-            ### 🏦 Ansparphase"""
-            - Dauer bis zur Zuteilung: **{monate_anspar // 12} Jahre und {monate_anspar % 12} Monate**"""
-            - Gesamtes Sparguthaben inkl. Einmalzahlung: **{df_anspar['Guthaben'].iloc[-1]:,.2f} €**"""
-            - Insgesamt erhaltene Zinsen: **{zinsen_anspar:,.2f} €**"""
-"""
-            ### 💳 Darlehensphase"""
-            - Monatliche Rate (Zins + Tilgung): **{df_darlehen['Tilgung'].iloc[0] + df_darlehen['Zinsen'].iloc[0]:,.2f} €**"""
-            - Gesamte Zinskosten während der Darlehensphase: **{zins_darlehen:,.2f} €**"""
-            - Laufzeit des Darlehens: **{laufzeit_darlehen // 12} Jahre und {laufzeit_darlehen % 12} Monate**"""
+    )
+
+# Hauptrechner
+def tarif_rechner(name, sparzins, regelsparbeitrag, abschlussgebuehr, jahresentgelt, zins_tilgung, darlehenszins):
+    st.title(f"🏡 LBS Bausparrechner – {name}")
+    
+    bausparsumme = st.number_input("💰 Bausparsumme (€):", min_value=10000, max_value=500000, step=1000)
+    if bausparsumme:
+        display_tarif_konditionen(name, sparzins, regelsparbeitrag, abschlussgebuehr, jahresentgelt, zins_tilgung, darlehenszins, bausparsumme)
+        vorschlag_sparrate = bausparsumme * regelsparbeitrag / 1000
+        monatlicher_sparbeitrag = st.number_input(
+            f"📅 Monatliche Sparrate (Vorschlag: {vorschlag_sparrate:.2f} €, Regelsparbeitrag):",
+            min_value=1.0,  # Mindestwert angepasst auf 1 €
+            max_value=2000.0,
+            value=float(max(1.0, vorschlag_sparrate)),
+            step=10.0,
+        )
+        st.caption("💡 Der Vorschlag basiert auf dem Regelsparbeitrag des gewählten Tarifs.")
+
+    einmalzahlung = st.number_input("💵 Einmalzahlung (€):", min_value=0.0, step=100.0)
+    zuteilungszeit = st.number_input("⏳ Gewünschte Zeit bis zur Zuteilung (in Jahren):", min_value=1.5, max_value=20.0, step=0.5)
+
+    if st.button("📊 Berechnung starten"):
+        with st.spinner("🔄 Berechnung wird durchgeführt..."):
+            time.sleep(2)
+
+        df_anspar = calculate_ansparphase_with_pandas(
+            bausparsumme, monatlicher_sparbeitrag, sparzins, abschlussgebuehr, jahresentgelt, einmalzahlung
+        )
+
+        monate_anspar = len(df_anspar)
+        zinsen_anspar = df_anspar["Zinsen"].sum()
+        angespartes_guthaben = df_anspar["Guthaben"].iloc[-1]
+
+        if monate_anspar / 12 > zuteilungszeit:
+            erforderliche_sparrate = calculate_adjusted_sparrate(
+                bausparsumme, abschlussgebuehr, sparzins, jahresentgelt, zuteilungszeit, einmalzahlung
+            )
+            st.warning(
+                f"⚠️ Die gewünschte Zuteilungszeit von **{zuteilungszeit:.1f} Jahren** kann nicht eingehalten werden. "
+                f"Tatsächliche Ansparzeit: **{monate_anspar / 12:.1f} Jahre**. "
+                f"💡 Um die Zuteilungszeit zu erreichen, müsste Ihre Sparrate auf etwa **{erforderliche_sparrate:.2f} €** erhöht werden."
+            )
+
+        df_darlehen = calculate_darlehensphase_with_pandas(
+            bausparsumme, angespartes_guthaben, darlehenszins, zins_tilgung
+        )
+        laufzeit_darlehen = len(df_darlehen)
+        zins_darlehen = df_darlehen["Zinsen"].sum()
+
+        st.markdown("## 📋 Ergebnisse")
+        st.markdown(
+            f"""
+            ### 🏦 Ansparphase
+            - Dauer bis zur Zuteilung: **{monate_anspar // 12} Jahre und {monate_anspar % 12} Monate**
+            - Gesamtes Sparguthaben inkl. Einmalzahlung: **{df_anspar['Guthaben'].iloc[-1]:,.2f} €**
+            - Insgesamt erhaltene Zinsen: **{zinsen_anspar:,.2f} €**
+
+            ### 💳 Darlehensphase
+            - Monatliche Rate (Zins + Tilgung): **{df_darlehen['Tilgung'].iloc[0] + df_darlehen['Zinsen'].iloc[0]:,.2f} €**
+            - Gesamte Zinskosten während der Darlehensphase: **{zins_darlehen:,.2f} €**
+            - Laufzeit des Darlehens: **{laufzeit_darlehen // 12} Jahre und {laufzeit_darlehen % 12} Monate**
             """
         )
 
