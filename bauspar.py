@@ -84,16 +84,6 @@ def calculate_adjusted_sparrate(bausparsumme, abschlussgebuehr, sparzins, jahres
 
 # Anzeige der Tarifkonditionen mit Darlehensphaseninformationen
 def display_tarif_konditionen(name, sparzins, regelsparbeitrag, abschlussgebuehr, jahresentgelt, zins_tilgung, darlehenszins, bausparsumme):
-    # Calculate mindestsparguthaben for the selected tariff
-    tarif_mindestansparsumme = {
-        "Classic20 Plus F": 0.4,
-        "Classic20 F8": 0.4,
-        "Komfort22": 0.3,
-        "Sprint22": 0.5,
-        "Classic20 F3": 0.4,
-        "Spar25": 0.4,
-    }
-    mindestsparguthaben = bausparsumme * tarif_mindestansparsumme.get(name, 0.4)  # Default to 40% if tariff not listed
     vorschlag_sparrate = bausparsumme * regelsparbeitrag / 1000
     df_regelspar = calculate_ansparphase_with_pandas(
         bausparsumme, vorschlag_sparrate, sparzins, abschlussgebuehr, jahresentgelt, 0
