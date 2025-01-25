@@ -7,7 +7,21 @@ import time
 # Berechnung der Ansparphase
 def calculate_ansparphase_with_pandas(bausparsumme, monatlicher_sparbeitrag, sparzins, abschlussgebuehr, jahresentgelt, einmalzahlung):
     restbetrag = -abschlussgebuehr + einmalzahlung
-    mindestsparguthaben = bausparsumme * 0.4
+    
+# Defining minimum savings percentages for different tariffs
+tarif_mindestansparsumme = {
+    "Classic20 Plus F": 0.4,
+    "Classic20 F8": 0.4,
+    "Komfort22": 0.3,
+    "Sprint22": 0.5,
+    "Classic20 F3": 0.4,
+    "Spar25": 0.4,
+}
+
+# Extract tariff name dynamically or pass it as a parameter
+# Ensure 'tarif_name' contains the correct name of the current tariff
+mindestsparguthaben = bausparsumme * tarif_mindestansparsumme.get(tarif_name, 0.4)  # Default to 40% if tariff not listed
+
     monate = 0
     data = []
 
@@ -41,7 +55,21 @@ def calculate_darlehensphase_with_pandas(bausparsumme, angespartes_guthaben, dar
 
 # Berechnung der erforderlichen Sparrate
 def calculate_adjusted_sparrate(bausparsumme, abschlussgebuehr, sparzins, jahresentgelt, zuteilungszeit, einmalzahlung):
-    mindestsparguthaben = bausparsumme * 0.4
+    
+# Defining minimum savings percentages for different tariffs
+tarif_mindestansparsumme = {
+    "Classic20 Plus F": 0.4,
+    "Classic20 F8": 0.4,
+    "Komfort22": 0.3,
+    "Sprint22": 0.5,
+    "Classic20 F3": 0.4,
+    "Spar25": 0.4,
+}
+
+# Extract tariff name dynamically or pass it as a parameter
+# Ensure 'tarif_name' contains the correct name of the current tariff
+mindestsparguthaben = bausparsumme * tarif_mindestansparsumme.get(tarif_name, 0.4)  # Default to 40% if tariff not listed
+
     restbetrag = -abschlussgebuehr + einmalzahlung
     jahresentgelt_betrag = min((bausparsumme / 1000) * jahresentgelt, 30)
     monate = int(zuteilungszeit * 12)
