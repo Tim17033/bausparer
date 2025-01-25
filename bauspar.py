@@ -98,22 +98,7 @@ def display_tarif_konditionen(name, sparzins, regelsparbeitrag, abschlussgebuehr
     monatliche_darlehensrate = darlehensphase_df["Tilgung"].iloc[0] + darlehensphase_df["Zinsen"].iloc[0]
     laufzeit_darlehen = len(darlehensphase_df)
 
-    
     st.markdown(f"### Tarifkonditionen – {name}")
-
-    # Display minimum savings amounts for all tariffs
-    st.markdown("### Mindestansparsummen aller Tarife (bezogen auf die eingegebene Bausparsumme)")
-    tarif_mindestansparsumme = {
-        "Classic20 Plus F": 0.4,
-        "Classic20 F8": 0.4,
-        "Komfort22": 0.3,
-        "Sprint22": 0.5,
-        "Classic20 F3": 0.4,
-        "Spar25": 0.4,
-    }
-    for tarif, prozent in tarif_mindestansparsumme.items():
-        st.markdown(f"- **{tarif}**: {bausparsumme * prozent:,.2f} € ({int(prozent * 100)}%)")
-    
     st.markdown(
         f"""
         **Ansparphase:**
@@ -121,6 +106,7 @@ def display_tarif_konditionen(name, sparzins, regelsparbeitrag, abschlussgebuehr
         - Monatlicher Regelsparbeitrag: **{regelsparbeitrag}‰** der Bausparsumme
         - Abschlussgebühr: **{abschlussgebuehr:.2f}%** der Bausparsumme
         - Jahresentgelt: **{jahresentgelt:.2f} €** pro 1.000 € Bausparsumme (max. 30 € pro Jahr)
+        - Mindestansparsumme (für diesen Tarif): **{mindestsparguthaben:,.2f} €**
         - Mindestansparsumme: **{bausparsumme * 0.4:,.2f} €**
         - Zuteilungszeit bei Regelsparbeitrag: **{monate_regelspar // 12} Jahre und {monate_regelspar % 12} Monate** (ca. **{zuteilungsdatum.strftime('%d.%m.%Y')}**)
 
