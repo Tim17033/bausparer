@@ -18,7 +18,13 @@ tarif_mindestansparsumme = {
     "Spar25": 0.4,
 }
 
-# Extract tariff name dynamically or pass it as a parameter
+
+# Define 'tarif_name' dynamically or as an input parameter for the function
+# Example: tarif_name = 'Classic20 Plus F'
+# Ensure 'tarif_name' is passed or assigned before using the calculation logic
+if 'tarif_name' not in locals():
+    tarif_name = 'Classic20 Plus F'  # Default tariff name for demonstration; replace or pass as needed
+
 # Ensure 'tarif_name' contains the correct name of the current tariff
 mindestsparguthaben = bausparsumme * tarif_mindestansparsumme.get(tarif_name, 0.4)  # Default to 40% if tariff not listed
 
@@ -66,7 +72,13 @@ tarif_mindestansparsumme = {
     "Spar25": 0.4,
 }
 
-# Extract tariff name dynamically or pass it as a parameter
+
+# Define 'tarif_name' dynamically or as an input parameter for the function
+# Example: tarif_name = 'Classic20 Plus F'
+# Ensure 'tarif_name' is passed or assigned before using the calculation logic
+if 'tarif_name' not in locals():
+    tarif_name = 'Classic20 Plus F'  # Default tariff name for demonstration; replace or pass as needed
+
 # Ensure 'tarif_name' contains the correct name of the current tariff
 mindestsparguthaben = bausparsumme * tarif_mindestansparsumme.get(tarif_name, 0.4)  # Default to 40% if tariff not listed
 
