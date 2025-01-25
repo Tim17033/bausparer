@@ -98,7 +98,11 @@ def display_tarif_konditionen(name, sparzins, regelsparbeitrag, abschlussgebuehr
     monatliche_darlehensrate = darlehensphase_df["Tilgung"].iloc[0] + darlehensphase_df["Zinsen"].iloc[0]
     laufzeit_darlehen = len(darlehensphase_df)
 
-    st.markdown(f"### Tarifkonditionen – {name}")
+    st.markdown(f"### Tarifkonditionen
+    st.markdown("### Mindestansparsummen aller Tarife")
+    for tarif, prozent in tarif_mindestansparsumme.items():
+        st.markdown(f"- **{tarif}**: {bausparsumme * prozent:,.2f} € ({int(prozent * 100)}%)")
+     – {name}")
     st.markdown(
         f"""
         **Ansparphase:**
