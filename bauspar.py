@@ -102,7 +102,7 @@ def display_tarif_konditionen(name, sparzins, regelsparbeitrag, abschlussgebuehr
     st.markdown("### Mindestansparsummen aller Tarife")
     for tarif, prozent in tarif_mindestansparsumme.items():
         st.markdown(f"- **{tarif}**: {bausparsumme * prozent:,.2f} € ({int(prozent * 100)}%)")
-    – {name}")
+    - {name}")
     st.markdown(
         f"""
         **Ansparphase:**
@@ -122,7 +122,7 @@ def display_tarif_konditionen(name, sparzins, regelsparbeitrag, abschlussgebuehr
 
 # Hauptrechner
 def tarif_rechner(name, sparzins, regelsparbeitrag, abschlussgebuehr, jahresentgelt, zins_tilgung, darlehenszins):
-    st.title(f"🏡 LBS Bausparrechner – {name}")
+    st.title(f"🏡 LBS Bausparrechner - {name}")
 
     bausparsumme = st.number_input("💰 Bausparsumme (€):", min_value=10000, max_value=500000, step=1000)
     if bausparsumme:
