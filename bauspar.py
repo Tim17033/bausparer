@@ -7,7 +7,7 @@ import time
 # Berechnung der Ansparphase
 def calculate_ansparphase_with_pandas(bausparsumme, monatlicher_sparbeitrag, sparzins, abschlussgebuehr, jahresentgelt, einmalzahlung):
     restbetrag = -abschlussgebuehr + einmalzahlung
-    
+
 # Defining minimum savings percentages for different tariffs
 tarif_mindestansparsumme = {
     "Classic20 Plus F": 0.4,
@@ -61,7 +61,7 @@ def calculate_darlehensphase_with_pandas(bausparsumme, angespartes_guthaben, dar
 
 # Berechnung der erforderlichen Sparrate
 def calculate_adjusted_sparrate(bausparsumme, abschlussgebuehr, sparzins, jahresentgelt, zuteilungszeit, einmalzahlung):
-    
+
 # Defining minimum savings percentages for different tariffs
 tarif_mindestansparsumme = {
     "Classic20 Plus F": 0.4,
@@ -125,7 +125,7 @@ def display_tarif_konditionen(name, sparzins, regelsparbeitrag, abschlussgebuehr
 # Hauptrechner
 def tarif_rechner(name, sparzins, regelsparbeitrag, abschlussgebuehr, jahresentgelt, zins_tilgung, darlehenszins):
     st.title(f"🏡 LBS Bausparrechner – {name}")
-    
+
     bausparsumme = st.number_input("💰 Bausparsumme (€):", min_value=10000, max_value=500000, step=1000)
     if bausparsumme:
         display_tarif_konditionen(name, sparzins, regelsparbeitrag, abschlussgebuehr, jahresentgelt, zins_tilgung, darlehenszins, bausparsumme)
