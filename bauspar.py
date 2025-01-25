@@ -106,7 +106,6 @@ def display_tarif_konditionen(name, sparzins, regelsparbeitrag, abschlussgebuehr
         - Monatlicher Regelsparbeitrag: **{regelsparbeitrag}‰** der Bausparsumme
         - Abschlussgebühr: **{abschlussgebuehr:.2f}%** der Bausparsumme
         - Jahresentgelt: **{jahresentgelt:.2f} €** pro 1.000 € Bausparsumme (max. 30 € pro Jahr)
-        - Mindestansparsumme: **{bausparsumme * 0.4:,.2f} €**
         - Zuteilungszeit bei Regelsparbeitrag: **{monate_regelspar // 12} Jahre und {monate_regelspar % 12} Monate** (ca. **{zuteilungsdatum.strftime('%d.%m.%Y')}**)
 
         **Darlehensphase:**
