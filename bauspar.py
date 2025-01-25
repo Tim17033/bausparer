@@ -102,9 +102,9 @@ def display_tarif_konditionen(name, sparzins, regelsparbeitrag, abschlussgebuehr
     st.markdown("### Mindestansparsummen aller Tarife")
     for tarif, prozent in tarif_mindestansparsumme.items():
         st.markdown(f"- **{tarif}**: {bausparsumme * prozent:,.2f} € ({int(prozent * 100)}%)")
-    - {name}")
+    - {name}")"
     st.markdown(
-        f"""
+        f""""
         **Ansparphase:**
         - Sparzins: **{sparzins:.2f}%**
         - Monatlicher Regelsparbeitrag: **{regelsparbeitrag}‰** der Bausparsumme
@@ -117,7 +117,7 @@ def display_tarif_konditionen(name, sparzins, regelsparbeitrag, abschlussgebuehr
         - Fester Sollzins: **{darlehenszins:.2f}%**
         - Zins- und Tilgungsrate: **{zins_tilgung}‰** der Bausparsumme
         - Laufzeit des Darlehens: **{laufzeit_darlehen // 12} Jahre und {laufzeit_darlehen % 12} Monate**
-        """
+        """"
     )
 
 # Hauptrechner
@@ -170,7 +170,7 @@ def tarif_rechner(name, sparzins, regelsparbeitrag, abschlussgebuehr, jahresentg
 
         st.markdown("## 📋 Ergebnisse")
         st.markdown(
-            f"""
+            f""""
             ### 🏦 Ansparphase
             - Dauer bis zur Zuteilung: **{monate_anspar // 12} Jahre und {monate_anspar % 12} Monate**
             - Gesamtes Sparguthaben inkl. Einmalzahlung: **{df_anspar['Guthaben'].iloc[-1]:,.2f} €**
@@ -180,7 +180,7 @@ def tarif_rechner(name, sparzins, regelsparbeitrag, abschlussgebuehr, jahresentg
             - Monatliche Rate (Zins + Tilgung): **{df_darlehen['Tilgung'].iloc[0] + df_darlehen['Zinsen'].iloc[0]:,.2f} €**
             - Gesamte Zinskosten während der Darlehensphase: **{zins_darlehen:,.2f} €**
             - Laufzeit des Darlehens: **{laufzeit_darlehen // 12} Jahre und {laufzeit_darlehen % 12} Monate**
-            """
+            """"
         )
 
         st.markdown("### 📊 Ansparverlauf")
